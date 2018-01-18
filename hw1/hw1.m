@@ -28,8 +28,13 @@ d0 = xopt0_neg_sqp(1,1);
 D0 = xopt0_neg_sqp(1,2);
 F0 = -fopt0_neg_sqp(1);
 
-d = linspace(.02,.075,300);
-D = linspace(.3,.8,300);
+dmax = .2;
+dmin = .01;
+Dmax = 1.5;
+Dmin = .04;
+
+d = linspace(dmin,dmax,700);
+D = linspace(Dmin,Dmax,700);
 [X,Y] = meshgrid(d,D);
 
 Sy = 0.44*Q./(d0^w);
@@ -43,7 +48,7 @@ tmin = (hf - h0).*k.*m;
 tm = (tmax + tmin)./2;
 ta = (tmax - tmin)./2;
 
-figure(1);
+fig1 = figure(1);
 
 % Change size of figure
 xywh = get(gcf,'position');
@@ -76,7 +81,7 @@ clabel(C,h,'LabelSpacing',ls);
 
 % Plot the point
 plot(d0,D0,'r*','MarkerSize',10,'LineWidth',2);
-text(d0-.0025,D0+.062,sprintf('d = %f\nD = %f\nF = %f',d0,D0,F0),'HorizontalAlignment','center','BackgroundColor',[.6,.6,.6]);
+%text(d0-.0025,D0+.062,sprintf('d = %f\nD = %f\nF = %f',d0,D0,F0),'HorizontalAlignment','center','BackgroundColor',[.6,.6,.6]);
 
 % Shade the feasible region
 xfeas = [ .0239;.04426;.072437;.0496 ];
@@ -88,12 +93,18 @@ title('Feasible Space');
 xlabel('wire diameter, d (in)');
 ylabel('coil diameter, D (in)');
 legend('Feasible Region','F','4 <= D/d <= 16','D + d < 0.75','h_{def} - h_s > .05','t_a <= S_e/S_f|_{d=d_{opt}}','t_a + t_m <= S_y/S_f|_{d=d_{opt}}','t_hs < Sy','Location','northwest','Optimum');
+axis([ .02 .075 .3 .8 ]);
+
+% Same figure, but "zoomed out"
+fig2 = copyobj(fig1,0);
+axis([ dmin dmax Dmin Dmax ]);
+legend('Location','northeast');
 
 %% Plot the histories
 % close all;
 
 for nn = 1:size(history,2)
-    figure(nn + 1);
+    figure(nn + 2);
     h = history(nn);
     xmin = min(h.x(:,1));
     xmax = max(h.x(:,1));
