@@ -55,7 +55,7 @@ function [x0,xopt,fopt,exitflag,histories] = optimize_spring(N,cfun,algorithm)
         c(3) = .05 - hdef + hs; % hdef - hs > 0.05
         c(4) = ta - Se/Sf;      % ta <= Se/Sf
         c(5) = ta + tm - Sy/Sf; % ta + tm <= Sy/Sf
-        c(6) = t_hs - Sy;    % t_hs < Sy
+        c(6) = t_hs - Sy;       % t_hs < Sy
         c(7) = D + d - .75;     % D + d < .75
         
         %equality constraints (ceq=0)

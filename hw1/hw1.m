@@ -39,14 +39,23 @@ D = linspace(Dmin,Dmax,700);
 
 Sy = 0.44*Q./(d0^w);
 hs = n*X;
+hs0 = n*d0;
 k = G*X.^4./(8*Y.^3*n);
+k0 = G*d0^4/(8*D0^3*n);
 K = (4*Y - X)./(4*(Y - X)) + 0.62*X./Y;
+K0 = (4*D0 - d0)/(4*(D0 - d0)) + 0.62*d0/D0;
 m = 8*K.*Y./(pi*X.^3);
+m0 = 8*K0*D0/(pi*d0^3);
 t_hs = (hf - hs).*k.*m;
+t_hs0 = (hf - hs0)*k0*m0;
 tmax = (hf - h0 + delta0).*k.*m;
+tmax0 = (hf - h0 + delta0)*k0*m0;
 tmin = (hf - h0).*k.*m;
+tmin0 = (hf - h0)*k0*m0;
 tm = (tmax + tmin)./2;
+tm0 = (tmax0 + tmin0)/2;
 ta = (tmax - tmin)./2;
+ta0 = (tmax0 - tmin0)/2;
 
 fig1 = figure(1);
 
@@ -64,7 +73,7 @@ hold on;
 [ C,h ] = contour(X,Y,Y./X,[4,16],'r','LineWidth',2); % 4 <= D/d <= 16
 clabel(C,h,'LabelSpacing',ls);
 
-[ C,h] = contour(X,Y,X + Y,[.75,.75],'g','LineWidth',2); % D + d < 0.75 % active
+[ C,h ] = contour(X,Y,X + Y,[.75,.75],'g','LineWidth',2); % D + d < 0.75 % active
 clabel(C,h,'LabelSpacing',ls);
 
 [ C,h ] = contour(X,Y,hdef - hs,[.05,.05],'b','LineWidth',2); % hdef - hs > 0.05 % active
@@ -73,10 +82,10 @@ clabel(C,h,'LabelSpacing',ls);
 [ C,h ] = contour(X,Y,ta,[Se/Sf,Se/Sf],'y','LineWidth',2); % ta <= Se/Sf
 clabel(C,h,'LabelSpacing',ls);
 
-[ C,h ] = contour(X,Y,ta + tm,[Sy/Sf,Sy/Sf],'cy','LineWidth',2); % ta + tm <= Sy/Sf
+[ C,h ] = contour(X,Y,ta + tm,[Sy/Sf,Sy/Sf],'cy','LineWidth',2); % ta + tm <= Sy/Sf % active
 clabel(C,h,'LabelSpacing',ls);
 
-[ C,h ] = contour(X,Y,t_hs,[Sy,Sy],'m','LineWidth',2); % t_hs < Sy % active
+[ C,h ] = contour(X,Y,t_hs,[Sy,Sy],'m','LineWidth',2); % t_hs < Sy
 clabel(C,h,'LabelSpacing',ls);
 
 % Plot the point
