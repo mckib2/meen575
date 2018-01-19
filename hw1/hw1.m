@@ -65,8 +65,8 @@ units = get(gcf,'units');
 set(gcf,'units',units,'position',[xywh(1),xywh(2),800,500]);
 
 ls = 1000; % label spacing
-[ C,h ] = contour(X,Y,(hf - h0)*k,'k'); % plot the force
-clabel(C,h,'LabelSpacing',ls);
+[ C_force,h ] = contour(X,Y,(hf - h0)*k,[0.1,1,2,3,4,5,6,7],'k'); % plot the force
+clabel(C_force,h,'LabelSpacing',500);
 
 % Plot the constraint contours
 hold on;
