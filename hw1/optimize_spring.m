@@ -1,7 +1,6 @@
 function [x0,xopt,fopt,exitflag,histories] = optimize_spring(N,cfun,algorithm)
 
     % ------------Starting point and bounds------------
-    %x0 = [ .05,.5,10,1.5 ]; % starting point
     %      d    D    n     hf
     ub = [ .2,  3.2, +Inf, +Inf ]; % upper bound
     lb = [ .01, .04, 1,    1 ]; % lower bound
@@ -76,7 +75,7 @@ function [x0,xopt,fopt,exitflag,histories] = optimize_spring(N,cfun,algorithm)
         
         history.x = [];
         history.fval = [];
-        options = optimoptions(@fmincon,'OutputFcn',@outfun,'MaxFunctionEvaluations',Inf,'MaxIterations',Inf,'Algorithm',algorithm);
+        options = optimoptions(@fmincon,'Display','none','OutputFcn',@outfun,'MaxFunctionEvaluations',Inf,'MaxIterations',Inf,'Algorithm',algorithm);
         [xopt(nn,:),fopt(nn,:),exitflag,~] = fmincon(@obj,x00,A,b,Aeq,beq,lb,ub,@con,options);
         histories(nn) = history;
     end
@@ -86,7 +85,7 @@ function [x0,xopt,fopt,exitflag,histories] = optimize_spring(N,cfun,algorithm)
         stop = false;
         switch state
             case 'init'
-                hold on;
+                %hold on;
             case 'iter'
             % Concatenate current point and objective function
             % value with history. x must be a row vector.
@@ -96,14 +95,14 @@ function [x0,xopt,fopt,exitflag,histories] = optimize_spring(N,cfun,algorithm)
             % searchdir.
               %searchdir = [searchdir;... 
               %             optimValues.searchdirection'];
-              plot(x(1),x(2),'o');
+              %plot(x(1),x(2),'o');
             % Label points with iteration number and add title.
             % Add .15 to x(1) to separate label from plotted 'o'
-              text(x(1)+.15,x(2),... 
-                   num2str(optimValues.iteration));
-              title('Sequence of Points Computed by fmincon');
+              %text(x(1)+.15,x(2),... 
+              %     num2str(optimValues.iteration));
+              %title('Sequence of Points Computed by fmincon');
             case 'done'
-                hold off;
+                %hold off;
             otherwise
          end
      end

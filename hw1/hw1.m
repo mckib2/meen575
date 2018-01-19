@@ -90,7 +90,7 @@ clabel(C,h,'LabelSpacing',ls);
 
 % Plot the point
 plot(d0,D0,'r*','MarkerSize',10,'LineWidth',2);
-%text(d0-.0025,D0+.062,sprintf('d = %f\nD = %f\nF = %f',d0,D0,F0),'HorizontalAlignment','center','BackgroundColor',[.6,.6,.6]);
+text(d0-.0025,D0+.062,sprintf('d = %f\nD = %f\nF = %f',d0,D0,F0),'HorizontalAlignment','center','BackgroundColor',[.6,.6,.6]);
 
 % Shade the feasible region
 xfeas = [ .0239;.04426;.072437;.0496 ];
