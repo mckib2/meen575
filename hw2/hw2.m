@@ -16,7 +16,7 @@ D = xopt(2);
 d = xopt(3);
 
 % Choose V and D for contour plot vars
-[Vm,Dm] = meshgrid(linspace(10,15,500),linspace(.001,.003,500));
+[Vm,Dm] = meshgrid(linspace(10,15,500),linspace(.001,.1,500));
 
 % Generate all vals
 [L,W,a,~,c,~,~,Qw,rho,Pg,f,fw,g,rhow,Cd,S,Rw,mu,gamma,delp,gc,Q,Pf,Vc] = getvals(Vm,Dm,d,0,1);
@@ -31,10 +31,9 @@ hold on;
 plot(V,D,'r*');
 
 % Show some constraints
-contour(Vm,Dm,Vc,[V/1.1,V/1.1]); % V < Vc*1.1
+contour(Vm,Dm,Vc,[V*1.1,V*1.1]); % V = Vc*1.1
 contour(Vm,Dm,c,[.4,.4],'--'); % c < .4
 contour(Vm,Dm,Dm,[.5,.5]); % D < 6 in
-contour(Vm,Dm,Dm,[2*d,2*d]); % 2*d < D
 % clabel(C,h);
 
 title('Slurry Pipeline Contour Plot');
