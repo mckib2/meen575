@@ -7,8 +7,8 @@
 clear;
 close all;
 
-useFit = 0;
-[ xopt,fopt,Ptot,~,~ ] = optimize_slurry(useFit);
+useFit = 0; show = 0;
+[ xopt,fopt,Ptot,~,~ ] = optimize_slurry(useFit,show);
 
 
 %% Let's mesh it

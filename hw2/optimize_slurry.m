@@ -1,4 +1,4 @@
-function [ xopt, fopt, Ptot, exitflag, output ] = optimize_slurry(useFit)
+function [ xopt, fopt, Ptot, exitflag, output ] = optimize_slurry(useFit,show)
 
     % ------------Starting point and bounds------------
     %      V     D         d
@@ -21,7 +21,7 @@ function [ xopt, fopt, Ptot, exitflag, output ] = optimize_slurry(useFit)
         d = x(3);
         
         % Get the rest of the variables
-        [L,W,a,V,c,D,d,Qw,rho,Pg,fr,fw,g,rhow,Cd,S,Rw,mu,gamma,delp,gc,Q,Pf,Vc] = getvals(V,D,d,useFit,0);
+        [L,W,a,V,c,D,d,Qw,rho,Pg,fr,fw,g,rhow,Cd,S,Rw,mu,gamma,delp,gc,Q,Pf,Vc] = getvals(V,D,d,useFit,show);
 
         % Objective Function
         % For now, let's just look at minimizing total power
