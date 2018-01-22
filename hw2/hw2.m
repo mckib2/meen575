@@ -6,7 +6,9 @@
 %% Optimize!
 clear;
 close all;
-[ xopt,fopt,Ptot,~,~ ] = optimize_slurry();
+
+useFit = 0;
+[ xopt,fopt,Ptot,~,~ ] = optimize_slurry(useFit);
 
 
 %% Let's mesh it
@@ -16,10 +18,10 @@ D = xopt(2);
 d = xopt(3);
 
 % Choose V and D for contour plot vars
-[Vm,Dm] = meshgrid(linspace(10,15,500),linspace(.001,.1,500));
+[Vm,Dm] = meshgrid(linspace(V-3,V+3,500),linspace(D-.1,D+.1,500));
 
 % Generate all vals
-[L,W,a,~,c,~,~,Qw,rho,Pg,f,fw,g,rhow,Cd,S,Rw,mu,gamma,delp,gc,Q,Pf,Vc] = getvals(Vm,Dm,d,0,1);
+[L,W,a,~,c,~,~,Qw,rho,Pg,f,fw,g,rhow,Cd,S,Rw,mu,gamma,delp,gc,Q,Pf,Vc] = getvals(Vm,Dm,d,useFit,1);
 
 %% Contour plots
 figure(2);

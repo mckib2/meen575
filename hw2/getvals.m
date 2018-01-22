@@ -3,11 +3,11 @@ function [L,W,a,V,c,D,d,Qw,rho,Pg,f,fw,g,rhow,Cd,S,Rw,mu,gamma,delp,gc,Q,Pf,Vc] 
     % Params
     % useFit = 0; % boolean
 
-    % fitType = 'poly2';
-    % fitType = 'linearinterp'; % piecewise linear interp
-    % fitType = 'cubicinterp'; % piecewise cubic interp
-    % fitType = 'smoothingspline'; % smoothing spline
-    fitType = 'exp1';
+%     fitType = 'poly2';
+    fitType = 'linearinterp'; % piecewise linear interp
+%     fitType = 'cubicinterp'; % piecewise cubic interp
+%     fitType = 'smoothingspline'; % smoothing spline
+%     fitType = 'exp2';
     afun = @(x) log(x);
     iafun = @(x) exp(x);
 
@@ -40,11 +40,16 @@ function [L,W,a,V,c,D,d,Qw,rho,Pg,f,fw,g,rhow,Cd,S,Rw,mu,gamma,delp,gc,Q,Pf,Vc] 
     Pg = 218.*W.*(1./sqrt(d) - 1./sqrt(a)); % ft-lbf/sec % power for grinding
     
     Rw = rhow.*V.*D./mu;
-    if Rw < 10e5
-        fw = 0.3164./Rw.^0.25;
-    else
-        fw = 0.0032 + 0.221.*Rw.^(-0.237);
-    end
+    
+    fw = ones(size(Rw));
+    fw(Rw < 10e5) = 0.3164./Rw(Rw < 10e5).^0.25;
+    fw(Rw >= 10e5) = 0.0032 + 0.221.*Rw(Rw >= 10e5).^(-0.237);
+    
+%     if Rw < 10e5
+%         fw = 0.3164./Rw.^0.25;
+%     else
+%         fw = 0.0032 + 0.221.*Rw.^(-0.237);
+%     end
 
     CdRp2_0 = 4.*g.*rhow.*d.^3.*(gamma - rhow)./(3.*mu.^2);
     afunCdRp2_0 = afun(CdRp2_0);
@@ -56,7 +61,7 @@ function [L,W,a,V,c,D,d,Qw,rho,Pg,f,fw,g,rhow,Cd,S,Rw,mu,gamma,delp,gc,Q,Pf,Vc] 
 
     %% Use either fit or nlinfit to get Cd
     if useFit == 1
-        [fobj2,gof2] = fit(afun(CdRp2s),afun(Cds),fitType,'Robust','LAR');
+        [fobj2,gof2] = fit(afun(CdRp2s),afun(Cds),fitType);%,'Robust','LAR');
         R = gof2.rsquare;
         afunCd = fobj2(afunCdRp2_0);
 

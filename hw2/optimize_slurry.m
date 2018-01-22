@@ -1,9 +1,9 @@
-function [ xopt, fopt, Ptot, exitflag, output ] = optimize_slurry()
+function [ xopt, fopt, Ptot, exitflag, output ] = optimize_slurry(useFit)
 
     % ------------Starting point and bounds------------
     %      V     D         d
     x0 = [ 5     0.2       0.001 ];
-    ub = [ +Inf  0.5       +Inf ];
+    ub = [ +Inf  0.5       .01 ];
     lb = [ 0     0.0005    0.0005 ];
 
     % ------------Linear constraints------------
@@ -21,7 +21,7 @@ function [ xopt, fopt, Ptot, exitflag, output ] = optimize_slurry()
         d = x(3);
         
         % Get the rest of the variables
-        [L,W,a,V,c,D,d,Qw,rho,Pg,fr,fw,g,rhow,Cd,S,Rw,mu,gamma,delp,gc,Q,Pf,Vc] = getvals(V,D,d,0,0);
+        [L,W,a,V,c,D,d,Qw,rho,Pg,fr,fw,g,rhow,Cd,S,Rw,mu,gamma,delp,gc,Q,Pf,Vc] = getvals(V,D,d,useFit,0);
 
         % Objective Function
         % For now, let's just look at minimizing total power
@@ -32,9 +32,10 @@ function [ xopt, fopt, Ptot, exitflag, output ] = optimize_slurry()
         f = cost(Pg,Pf);
         
         % set objective/constraints here (c <= 0)
-        con = zeros(2,1);
+        con = zeros(1,1);
         con(1) = d - a; % d < a
         con(2) = d - D; % d < D
+        con(3) = c - 0.4; % c < 0.4
         
         ceq = zeros(1,1);
         ceq(1) = V - Vc*1.1; % V = 1.1*Vc
