@@ -7,12 +7,11 @@
 clear;
 close all;
 
-useFit = 0; show = 0;
+useFit = 1; show = 0;
 [ xopt,fopt,Ptot,~,~ ] = optimize_slurry(useFit,show);
 
-
 %% Let's mesh it
-fprintf('Cost of %f\nPtot of %f\n',fopt,Ptot);
+fprintf('Cost of %f\nPtot of %f\nPtot (hp) of %f\n',fopt,Ptot,Ptot/550);
 V = xopt(1);
 D = xopt(2);
 d = xopt(3);
@@ -20,25 +19,32 @@ d = xopt(3);
 % Choose V and D for contour plot vars
 [Vm,Dm] = meshgrid(linspace(V-3,V+3,500),linspace(D-.1,D+.1,500));
 
-% Generate all vals
-[L,W,a,~,c,~,~,Qw,rho,Pg,f,fw,g,rhow,Cd,S,Rw,mu,gamma,delp,gc,Q,Pf,Vc] = getvals(Vm,Dm,d,useFit,1);
+% Generate all mesh vals
+[~,~,~,~,c,~,~,Qw,rho,Pg,f,fw,~,~,~,~,Rw,~,~,delp,~,Q,Pf,Vc] = getvals(Vm,Dm,d,useFit,1);
+
+% Generate the single optimum vals and constants
+[L,W,a,~,copt,~,~,Qw_opt,rho_opt,Pg_opt,f_opt,fw_opt,g_opt,rhow_opt,Cd_opt,S_opt,Rw_opt,mu,gamma,delp_opt,gc,Q_opt,Pf_opt,Vc_opt] = getvals(V,D,d,useFit,0);
 
 %% Contour plots
 figure(2);
+ls = 500; % label spacing
 [ C,h ] = contour(Vm,Dm,cost(Pg,Pf));
-clabel(C,h);
+clabel(C,h,'LabelSpacing',ls);
 hold on;
 
 % Plot the optimum
 plot(V,D,'r*');
+text(V+.15,D,sprintf('V=%f\nD=%f\nd=%.1e',V,D,d),'BackgroundColor',[.9 .9 .9]);
 
 % Show some constraints
-contour(Vm,Dm,Vc,[V*1.1,V*1.1]); % V = Vc*1.1
-contour(Vm,Dm,c,[.4,.4],'--'); % c < .4
-contour(Vm,Dm,Dm,[.5,.5]); % D < 6 in
-% clabel(C,h);
+ls = 1000;
+[ C,h ] = contour(Vm,Dm,Vm,[Vc_opt*1.1,Vc_opt*1.2],':'); % 1.1*Vc < V
+clabel(C,h,'LabelSpacing',ls);
+
+[ C,h ] = contour(Vm,Dm,c,[.4,.5],'--'); % c < .4
+clabel(C,h,'LabelSpacing',ls);
 
 title('Slurry Pipeline Contour Plot');
 xlabel('Average flow velocity, V (ft/sec)');
 ylabel('Internal diameter of pipe, D (ft)');
-legend('Cost','Optimum','Vc','c');
+legend('Cost','Optimum','V > 1.1*V_c','c < .4');

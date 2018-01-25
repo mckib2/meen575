@@ -2,7 +2,7 @@ function [ xopt, fopt, Ptot, exitflag, output ] = optimize_slurry(useFit,show)
 
     % ------------Starting point and bounds------------
     %      V     D         d
-    x0 = [ 5     0.2       0.001 ];
+    x0 = [ 10    0.0006       0.0006 ];
     ub = [ +Inf  0.5       .01 ];
     lb = [ 0     0.0005    0.0005 ];
 
@@ -32,13 +32,13 @@ function [ xopt, fopt, Ptot, exitflag, output ] = optimize_slurry(useFit,show)
         f = cost(Pg,Pf);
         
         % set objective/constraints here (c <= 0)
-        con = zeros(1,1);
-        con(1) = d - a; % d < a
-        con(2) = d - D; % d < D
-        con(3) = c - 0.4; % c < 0.4
+        con = zeros(2,1);
+        con(1) = c - 0.4; % c < 0.4
+        con(2) = -V + Vc*1.1; % 1.1*Vc < V
         
-        ceq = zeros(1,1);
-        ceq(1) = V - Vc*1.1; % V = 1.1*Vc
+        ceq = [];
+        %ceq = zeros(1,1);
+        %ceq(1) = V - Vc*1.1; % V = 1.1*Vc
     end
 
     % ------------Call fmincon------------
