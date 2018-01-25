@@ -42,7 +42,7 @@ function [ xopt, fopt, Ptot, exitflag, output ] = optimize_slurry(useFit,show)
     end
 
     % ------------Call fmincon------------
-    options = optimoptions(@fmincon,'display','iter-detailed','StepTolerance',1e-16,'Algorithm','sqp','MaxFunctionEvaluations',Inf);
+    options = optimoptions(@fmincon,'display','iter-detailed','StepTolerance',1e-16);%,'Algorithm','sqp','MaxFunctionEvaluations',Inf);
     [xopt, fopt, exitflag, output] = fmincon(@obj, x0, A, b, Aeq, beq, lb, ub, @con, options);
     
     % ------------Separate obj/con (do not change)------------

@@ -3,8 +3,8 @@ function [L,W,a,V,c,D,d,Qw,rho,Pg,f,fw,g,rhow,Cd,S,Rw,mu,gamma,delp,gc,Q,Pf,Vc] 
     % Params
     % useFit = 0; % boolean
 
-%     fitType = 'poly2';
-    fitType = 'linearinterp'; % piecewise linear interp
+    fitType = 'poly3';
+%     fitType = 'linearinterp'; % piecewise linear interp
 %     fitType = 'cubicinterp'; % piecewise cubic interp
 %     fitType = 'smoothingspline'; % smoothing spline
 %     fitType = 'exp2';
@@ -41,8 +41,8 @@ function [L,W,a,V,c,D,d,Qw,rho,Pg,f,fw,g,rhow,Cd,S,Rw,mu,gamma,delp,gc,Q,Pf,Vc] 
     Rw = rhow.*V.*D./mu;
     
     fw = ones(size(Rw));
-    fw(Rw < 10e5) = 0.3164./Rw(Rw < 10e5).^0.25;
-    fw(Rw >= 10e5) = 0.0032 + 0.221.*Rw(Rw >= 10e5).^(-0.237);
+    fw(Rw < 10e5) = 0.3164./(Rw(Rw < 10e5).^(0.25));
+    fw(Rw >= 10e5) = 0.0032 + 0.221.*(Rw(Rw >= 10e5).^(-0.237));
     
 %     if Rw < 10e5
 %         fw = 0.3164./Rw.^0.25;
@@ -55,8 +55,8 @@ function [L,W,a,V,c,D,d,Qw,rho,Pg,f,fw,g,rhow,Cd,S,Rw,mu,gamma,delp,gc,Q,Pf,Vc] 
 
     % grab the data
     data = xlsread('Cd_vs_CdRp2.xlsx');
-    Cds = data(:,1);
-    CdRp2s = data(:,2);
+    Cds = data(:,2);
+    CdRp2s = data(:,1);
 
     % check to make sure we have a number that makes sense
     CdRp2_0(CdRp2_0 < min(CdRp2s)) = min(CdRp2s);
@@ -75,6 +75,31 @@ function [L,W,a,V,c,D,d,Qw,rho,Pg,f,fw,g,rhow,Cd,S,Rw,mu,gamma,delp,gc,Q,Pf,Vc] 
             title('C_dR_p^2 vs C_d');
             ylabel('C_d');
             xlabel('C_dR_p^2');
+        end
+    elseif useFit == 2
+%         method = 'linear';
+%         method = 'nearest';
+%         method = 'next';
+%         method = 'previous';
+%         method = 'spline';
+%         method = 'pchip';
+%         method = 'makima';
+        method = 'cubic';
+        
+        ffun = @(x,y,xs) interp1(x,y,xs,method);
+        
+        afunCd = ffun(afun(CdRp2s),afun(Cds),afunCdRp2_0);
+        R = 0;
+        
+        if show == 1
+            figure(1);
+            plot(afun(CdRp2s),afun(Cds),'.');
+            hold on;
+            xs = linspace(-1,25,500).';
+            ys = ffun(afun(CdRp2s),afun(Cds),xs);
+            plot(xs,ys);
+            plot(afunCdRp2_0,afunCd,'r*');
+            legend('Samples','Fit','afun(Cd)');
         end
     else
         expmod = @(b,x) b(1) - b(2).*exp(b(3).*x) - b(4).*exp(b(5).*x);
@@ -107,7 +132,7 @@ function [L,W,a,V,c,D,d,Qw,rho,Pg,f,fw,g,rhow,Cd,S,Rw,mu,gamma,delp,gc,Q,Pf,Vc] 
 
     S = gamma./rhow; % specific gravity of the limestone
     rho = rhow + c.*(gamma - rhow); % lbm/ft^3 % slurry density
-    f = fw.*(rhow./rho + 150.*c.*(rhow./rho).*((g.*D.*(S - 1))./(V.^2.*sqrt(Cd))).^1.5); % friction factor for the slurry
+    f = fw.*(rhow./rho + 150.*c.*(rhow./rho).*((g.*D.*(S - 1))./(V.^2.*sqrt(Cd))).^(1.5)); % friction factor for the slurry
     delp = f.*rho.*L.*V.^2./(D.*2.*gc); % lbf/ft^2 % pressure drop in pipe due to friction
     Pf = delp.*Q;
 

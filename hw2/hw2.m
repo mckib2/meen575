@@ -8,10 +8,10 @@ clear;
 close all;
 
 useFit = 1; show = 0;
-[ xopt,fopt,Ptot,~,~ ] = optimize_slurry(useFit,show);
+[ xopt,objective,Ptot,~,~ ] = optimize_slurry(useFit,show);
 
 %% Let's mesh it
-fprintf('Cost of %f\nPtot of %f\nPtot (hp) of %f\n',fopt,Ptot,Ptot/550);
+fprintf('Cost of %f\nPtot of %f\nPtot (hp) of %f\n',objective,Ptot,Ptot/550);
 V = xopt(1);
 D = xopt(2);
 d = xopt(3);
