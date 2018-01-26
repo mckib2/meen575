@@ -27,19 +27,23 @@ d = xopt(3);
 
 %% Contour plots
 figure(2);
+
+h = fill([ V V max(max(Vm)) max(max(Vm)) 8.909 ],[ D max(max(Dm)) max(max(Dm)) .1538 .1638 ],[.9,.9,.9],'LineStyle','none');
+uistack(h,'bottom');
+hold on;
+
 ls = 500; % label spacing
 [ C,h ] = contour(Vm,Dm,cost(Pg,Pf));
 clabel(C,h,'LabelSpacing',ls);
-hold on;
 
 % Plot the optimum
 plot(V,D,'r*');
-text(V+.15,D,sprintf('V=%f\nD=%f\nd=%.1e',V,D,d),'BackgroundColor',[.9 .9 .9]);
+text(V+.15,D,sprintf('V=%f\nD=%f\nd=%.1e',V,D,d),'BackgroundColor',[.6 .6 .6]);
 
 % Show some constraints
-ls = 1000;
+ls = 700;
 [ C,h ] = contour(Vm,Dm,Vm,[Vc_opt*1.1,Vc_opt*1.2],':'); % 1.1*Vc < V
-clabel(C,h,'LabelSpacing',ls);
+clabel(C,h);
 
 [ C,h ] = contour(Vm,Dm,c,[.4,.5],'--'); % c < .4
 clabel(C,h,'LabelSpacing',ls);
@@ -47,4 +51,4 @@ clabel(C,h,'LabelSpacing',ls);
 title('Slurry Pipeline Contour Plot');
 xlabel('Average flow velocity, V (ft/sec)');
 ylabel('Internal diameter of pipe, D (ft)');
-legend('Cost','Optimum','V > 1.1*V_c','c < .4');
+legend('Feasible','Cost','Optimum','V > 1.1*V_c','c < .4');
