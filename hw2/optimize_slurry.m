@@ -1,8 +1,10 @@
-function [ xopt, fopt, Ptot, exitflag, output ] = optimize_slurry(useFit,show)
+function [ xopt, fopt, Ptot, exitflag, output ] = optimize_slurry(useFit,show,x0)
 
     % ------------Starting point and bounds------------
-    %      V     D         d
-    x0 = [ 10    0.0006       0.0006 ];
+    if nargin < 3
+        %      V     D         d
+        x0 = [ 10    0.0006       0.0006 ];
+    end
     ub = [ +Inf  0.5       .01 ];
     lb = [ 0     0.0005    0.0005 ];
 
@@ -42,7 +44,7 @@ function [ xopt, fopt, Ptot, exitflag, output ] = optimize_slurry(useFit,show)
     end
 
     % ------------Call fmincon------------
-    options = optimoptions(@fmincon,'display','iter-detailed','StepTolerance',1e-16);%,'Algorithm','sqp','MaxFunctionEvaluations',Inf);
+    options = optimoptions(@fmincon,'display','none','StepTolerance',1e-16,'Algorithm','sqp','MaxFunctionEvaluations',Inf);
     [xopt, fopt, exitflag, output] = fmincon(@obj, x0, A, b, Aeq, beq, lb, ub, @con, options);
     
     % ------------Separate obj/con (do not change)------------
