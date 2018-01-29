@@ -72,9 +72,9 @@ function [L,W,a,V,c,D,d,Qw,rho,Pg,f,fw,g,rhow,Cd,S,Rw,mu,gamma,delp,gc,Q,Pf,Vc] 
             figure(1);
             plot(fobj2,[afun(CdRp2s); afunCdRp2_0],[afun(Cds); afunCd]);
             hold on; plot(afunCdRp2_0,afunCd,'r*');
-            title('C_dR_p^2 vs C_d');
-            ylabel('C_d');
-            xlabel('C_dR_p^2');
+            title('ln C_dR_p^2 vs ln C_d');
+            ylabel('ln C_d');
+            xlabel('ln C_dR_p^2');
         end
     elseif useFit == 2
 %         method = 'linear';
