@@ -8,12 +8,12 @@ ngrad = 0;
 % 1 => quadratic
 % 2 => rosenbrocks
 % 3 => book example
-testflag = 1;
+testflag = 3;
 
 % 1 => steepest descent
 % 2 => conjugate gradient
 % 3 => BFGS
-algoflag = 2;
+algoflag = 3;
 
 if testflag == 1
     x0 = [10,10,10].';
@@ -28,15 +28,15 @@ end
 
 
 [xopt,fopt,exitflag] = fminun(@obj,@grad,x0,stoptol,algoflag);
-disp(table(x0,xopt));
-disp(table(fopt,exitflag,nobj,ngrad));
 fprintf('Efficiency: %f\n',nobj + numel(x0)*ngrad);
+disp(table(x0,xopt,grad(xopt)));
+disp(table(fopt,exitflag,nobj,ngrad));
 
 
 fprintf('We were actaully looking for...\n');
-options = optimoptions('fminunc','Algorithm','trust-region','SpecifyObjectiveGradient',true);
+options = optimoptions('fminunc','Algorithm','trust-region','SpecifyObjectiveGradient',true,'StepTolerance',eps,'MaxFunctionEvaluations',500,'MaxIterations',Inf);
 [ x,f ] = fminunc(@(x) fminunc_obj(x),x0,options);
-disp(table(x0,x));
+disp(table(x0,x,grad(x)));
 disp(table(f));
 
 
@@ -56,34 +56,17 @@ function [ f ] = obj(x)
 end
 
 function [ f,g ] = fminunc_obj(x)
-    global testflag;
-    
-    if testflag == 1
-        f = 20 + 3*x(1) - 6*x(2) + 8*x(3)^2 + 6*x(1)^2 - 2*x(1)*x(2) - x(1)*x(3) + x(2)^2 + 0.5*x(3)^2;
-        
-        g(1,1) = 12*x(1) - 2*x(2) - x(3) + 3;
-        g(2,1) = -2*(x(1) - x(2) + 3);
-        g(3,1) = -x(1) + x(3) + 8;
-    elseif testflag == 2
-        f = 100*(x(2) - x(1)^2)^2 + (1 - x(1))^2;
-        
-        g(1,1) = -400*(x(2) - x(1)^2)*x(1) - 2*(1 - x(1));
-        g(2,1) = 200*(x(2) - x(1)^2);
-    elseif testflag == 3
-        f = x(1)^2 - 2*x(1)*x(2) + 4*x(2)^2;
-        
-        g(1,1) = 2*x(1) - 2*x(2);
-        g(2,1) = -2*x(1) + 8*x(2);
-    end
+    f = obj(x);
+    g = grad(x);
 end
 
 function [ g ] = grad(x)
     global ngrad testflag;
     
     if testflag == 1
-        g(1,1) = 12*x(1) - 2*x(2) - x(3) + 3;
+        g(3,1) = 12*x(1) - 2*x(2) - x(3) + 3;
         g(2,1) = -2*(x(1) - x(2) + 3);
-        g(3,1) = -x(1) + x(3) + 8;
+        g(1,1) = -x(1) + x(3) + 8;
     elseif testflag == 2
         g(1,1) = -400*(x(2) - x(1)^2)*x(1) - 2*(1 - x(1));
         g(2,1) = 200*(x(2) - x(1)^2);
@@ -99,66 +82,104 @@ function [ xopt,fopt,exitflag ] = fminun(obj,grad,x0,stoptol,algoflag)
     global nobj;
     maxEval = 500;
     iter = 0;
-    
-    % initial conditions
-    x = x0;
-    a = 0.4;
-    g = grad(x);
-    
+
     if algoflag == 1 % steepest descent
         
-        % Do one iteration with standard gradient descent
-        a = linesearch(a,-g/norm(g),x,obj);
-        x = x - a*g/norm(g);
-        iter = 1;
-        
-        while (any(abs(g) > stoptol) && (nobj <= maxEval))
+        % initial conditions
+        x = x0;
+        a = 0.15;
+
+        while 1
             g = grad(x);
-            s = -g/norm(g);
-            a = linesearch(a,s,x,obj);
+            s = -g;
+            
+            % quadratic line search it up in here
+            a = linesearch(a,x,s,obj);
+            if a < stoptol
+                a = stoptol;
+            end
+            
             x = x + a*s;
 
             iter = iter + 1;
+            % Check conditons
+            if ((a <= stoptol) || (nobj >= maxEval))
+                fprintf('Steepest descent exiting...\n');
+                break;
+            end
         end
     elseif algoflag == 2 % conjugate gradient
         
+        % Initialize and perform first step
+        a = 0.15;
+        x = x0;
+        g = grad(x);
         s = -g;
-        xn = x + a*s;
-        
-        xp = x;
-        x = xn;
-        f = obj(x);
+        x = x + a*s;
         gp = g;
-        sp = s;
         
         iter = 1;
-        while (any(abs(g) > stoptol) && (nobj <= maxEval))
+        while 1
+            
             g = grad(x);
-            beta = g.'*g/(gp.'*gp);
-            s = -g + beta*sp;
-            %a = (x - xp)'*(g - gp)/norm(g - gp)^2; % Baizilai-Borwein method
-            a = .1;
-            xn = x + a*s;
+            beta = dot(g,g)/dot(gp,gp);
+            s = -g + beta*s;
             
-            fn = obj(xn);
-            if (fn > f)
-                s = -x + xp;
-                xn = x + a*s;
-                fn = obj(xn);
-            end
-            
+            % quadratic line search it up in here
+            a = linesearch(a,x,s,obj);
+            x = x + a*s;
             gp = g;
-            xp = x;
-            x = xn;
-            f = fn;
-            sp = s;
             
             iter = iter + 1;
+            % Check conditons
+            if ((a <= stoptol) || (nobj >= maxEval))
+                fprintf('Steepest descent exiting...\n');
+                break;
+            end
         end
         
     else % quasi-newton
+        
+        x = x0;
+        a = 0.15;
+        g = grad(x);
+        N = eye(numel(x),numel(x));
+        s = -N*g;
+        a = linesearch(a,x,s,obj);
+        xp = x;
+        x = xp + a*s;
+        dx = x - xp;
+        Np = N;
+        
+        iter = 1;
+        while 1
+            gamma = N*dx;
+            
+            if dx.'*gamma > 0
+                N = Np + (1 + (gamma.'*Np*gamma)/(dx.'*gamma))*((dx*dx.')/(dx.'*gamma)) - (dx*gamma.'*Np + Np*gamma*dx.')/(dx.'*gamma);
+            else
+                N = Np;
+            end
+            
+            g = grad(x);
+            s = -N*g;
+            xp = x;
+            a = linesearch(a,x,s,obj);
+            x = xp + a*s;
+            dx = x - xp;
+            Np = N;
+            
+            iter = iter + 1;
+            % Check conditons
+            %if ((a <= stoptol) || (nobj >= maxEval))
+            if (all(abs(g) <= stoptol) || (nobj >= maxEval))
+                fprintf('Steepest descent exiting...\n');
+                break;
+            end
+        end
     end
 
+    % Get all the output nice and wrapped up
     xopt = x;
     fopt = obj(xopt);
     fprintf('Total iterations: %d\n',iter);
@@ -170,50 +191,10 @@ function [ xopt,fopt,exitflag ] = fminun(obj,grad,x0,stoptol,algoflag)
     end
 end
 
-function [ a ] = linesearch(a,s,x0,obj)
-    x = zeros(numel(x0),10);
-    x(:,1) = x0;
-    a(1) = a;
-
-    f(1) = obj(x(:,1));
-    x(:,2) = x(:,1) + a(1)*s;
-    f(2) = obj(x(:,2));
-   
-    idx = 3;
-    while (f(end) < f(end-1))
-        a(idx-1) = a(idx-2)*2;
-        x(:,idx) = x(:,1) + a(idx-1)*s;
-        f(idx) = obj(x(:,idx));
-        
-        idx = idx + 1;
-    end
-   
-    
-    if (numel(f) >= 3)
-    
-        a(idx-1) = (a(idx-2) + a(idx-3))/2;
-        x(:,idx) = x(:,1) + a(idx-1)*s;
-        f(idx) = obj(x(:,idx));
-        
-        % This means it's not convex
-        if (f(end) < f(end-2))
-            [ ~,idx ] = min(f);
-            a = a(idx-1);
-            return;
-        end
-
-        % Take the point with the lowest function value
-        [ f2,idx ] = min(f);
-        a2 = a(idx-1);
-        
-        f1 = f(idx-1);
-        f3 = f(idx+1);
-
-        da = a(2)-a(1);
-
-        a = a2 + (da*(f1 - f3))/(2*(f1 - 2*f2 + f3));
-    else
-        [ ~,idx ] = min(f);
-        a = a(idx);
-    end
+function [ a ] = linesearch(a,x,s,obj)
+    f1 = obj(x + a*s);
+    f2 = obj(x + 2*a*s);
+    f3 = obj(x + 4*a*s);
+    a = (f1*(4*a^2 - 16*a^2) + f2*(16*a^2 - a^2) + f3*(a^2 - 4*a^2))/ ...
+        (2*(f1*(2*a - 4*a) + f2*(4*a - a) + f3*(a - 2*a)));
 end
