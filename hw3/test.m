@@ -95,7 +95,8 @@ function [ xopt,fopt,exitflag,h ] = fminun(obj,grad,x0,stoptol,algoflag)
             s = -g/norm(g);
             
             % Quadratic line search it up in here
-            a = linesearch(a,x,s,obj);
+            %a = linesearch(a,x,s,obj);
+            a = get_alpha(a,x,obj(x),g,s,obj,grad);
             
             % Update
             x = x + a*s;
@@ -237,4 +238,128 @@ function [ a ] = linesearch(a,x,s,obj)
     f3 = obj(x + 4*a*s);
     a = (f1*(4*a^2 - 16*a^2) + f2*(16*a^2 - a^2) + f3*(a^2 - 4*a^2))/ ...
         (2*(f1*(2*a - 4*a) + f2*(4*a - a) + f3*(a - 2*a)));
+end
+
+%% Bracket out an interval of acceptable points, 2.6.2
+function [a,b,alpha] = bracketing(alpha,x0,f0,g0,s,obj,grad)
+
+    % Let's choose some values
+    tau = 9; % typical value for  tau > 1
+    sigma = 0.1; % 0.9 => weak line search, .1 => fairly accurate
+    rho = 0.01; % is typical
+    fbar = 0; % lower bound on f(alpha); 0 for nonlinear ls problem
+    mu = (fbar - f0)/(rho*s.'*g0);
+    
+    
+    % Initial conditions
+    fp = f0;
+    alphap = alpha;
+    %gp = g0;
+    
+    tflag = 0;
+    % Start looping till we get an alpha or an iterval a,b
+    while 1
+        f = obj(x0 + alpha*s);
+        
+        if f <= f0
+            % terminate for good!
+            tflag = 1;
+            break;
+        end
+        if ((f > (f0 + alpha*s.'*g0)) || (f >= fp))
+            a = alphap;
+            b = alpha;
+            % terminate
+            break;
+        end
+        
+        g = grad(x0 + alpha*s);
+        if (abs(g) <= -sigma*g0)
+            % terminate
+            break;
+        end
+        
+        if (g >= 0)
+            a = alpha;
+            b = alphap;
+            % terminate
+            break;
+        end
+        
+        if (mu <= (2*alpha - alphap))
+            alphap = alpha;
+            alpha = mu;
+        else
+            alphap = alpha;
+            
+            % Choose alpha to minimize in the given interval a cubic
+            % polynomial interpolating f(alpha),grad(alpha),f(alphap), and
+            % grad(alphap).
+            ab = [ (2*alpha - alphap), min([ mu, (alpha + tau*(alpha - alphap)) ]) ];
+            %cp = interp1([],
+            
+            % Well, since we can choose any way, I choose random for now
+            alpha = (ab(2) - ab(1)).*rand(1,1) + ab(1);
+        end
+        
+        alphap = alpha;
+    end
+   
+    if tflag == 0
+       % go to next stage
+       alpha = NaN;
+    else
+        a = NaN;
+        b = NaN;
+    end
+end
+
+%% Sectioning to find acceptable point, 2.6.4
+function [ alpha ] = get_alpha(alpha,x0,f0,g0,s,obj,grad)
+
+    [ a,b,alpha_try] = bracketing(alpha,x0,f0,g0,s,obj,grad);
+
+    if ~isnan(alpha_try)
+        alpha = alpha_try;
+        return;
+    end
+    
+    % Set some parameters
+    % 0 < tau2 < tau3 <= 1/2
+    tau2 = 1/10; % typical, tau2 <= sigma is  advisable
+    tau3 = 1/2; % algorithm is insensitive to tau2,tau3
+    rho = 0.1;
+    
+    % Loop until we find acceptable alpha
+    while 1
+        
+        % Sensible to minimize in the given interval a quadratic or cubic
+        % polynomial which interpolates f(a),grad(a),f(b),grad(b) if known
+        ab = [ (alpha + tau2*(b - a)), (b - tau3*(b - a)) ];
+        alpha = (ab(2) - ab(1)).*rand(1,1) + ab(1);
+        
+        f = obj(x0 + alpha*s);
+        fa = obj(x0 + a*s);
+        
+        if ((f > (f0 + rho*alpha*s.'*g0)) || (f >= fa))
+            a = a;
+            b = alpha;
+        else
+            g = grad(alpha);
+            
+            if (abs(g) <= -sigma*g0)
+                % terminate
+                break;
+            end
+            
+            a = alpha;
+            
+            if ((b - a)*g >= 0)
+                b = a;
+            else
+                b = b;
+            end
+        end
+    end
+    
 end
