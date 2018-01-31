@@ -8,12 +8,12 @@ ngrad = 0;
 % 1 => quadratic
 % 2 => rosenbrocks
 % 3 => book example
-testflag = 3;
+testflag = 1;
 
 % 1 => steepest descent
 % 2 => conjugate gradient
 % 3 => BFGS
-algoflag = 3;
+algoflag = 1;
 
 if testflag == 1
     x0 = [10,10,10].';
@@ -27,7 +27,7 @@ elseif testflag == 3
 end
 
 
-[xopt,fopt,exitflag] = fminun(@obj,@grad,x0,stoptol,algoflag);
+[xopt,fopt,exitflag,h] = fminun(@obj,@grad,x0,stoptol,algoflag);
 fprintf('Efficiency: %f\n',nobj + numel(x0)*ngrad);
 disp(table(x0,xopt,grad(xopt)));
 disp(table(fopt,exitflag,nobj,ngrad));
@@ -45,7 +45,7 @@ function [ f ] = obj(x)
     global nobj testflag;
 
     if testflag == 1
-        f = 20 + 3*x(1) - 6*x(2) + 8*x(3)^2 + 6*x(1)^2 - 2*x(1)*x(2) - x(1)*x(3) + x(2)^2 + 0.5*x(3)^2;
+        f = 20 + 3*x(1) - 6*x(2) + 8*x(3) + 6*x(1)^2 - 2*x(1)*x(2) - x(1)*x(3) + x(2)^2 + 0.5*x(3)^2;
     elseif testflag == 2
         f = 100*(x(2) - x(1)^2)^2 + (1 - x(1))^2;
     elseif testflag == 3
@@ -64,9 +64,9 @@ function [ g ] = grad(x)
     global ngrad testflag;
     
     if testflag == 1
-        g(3,1) = 12*x(1) - 2*x(2) - x(3) + 3;
+        g(1,1) = 12*x(1) - 2*x(2) - x(3) + 3;
         g(2,1) = -2*(x(1) - x(2) + 3);
-        g(1,1) = -x(1) + x(3) + 8;
+        g(3,1) = -x(1) + x(3) + 8;
     elseif testflag == 2
         g(1,1) = -400*(x(2) - x(1)^2)*x(1) - 2*(1 - x(1));
         g(2,1) = 200*(x(2) - x(1)^2);
@@ -78,7 +78,7 @@ function [ g ] = grad(x)
     ngrad = ngrad + 1;
 end
 
-function [ xopt,fopt,exitflag ] = fminun(obj,grad,x0,stoptol,algoflag)
+function [ xopt,fopt,exitflag,h ] = fminun(obj,grad,x0,stoptol,algoflag)
     global nobj;
     maxEval = 500;
     iter = 0;
@@ -90,92 +90,129 @@ function [ xopt,fopt,exitflag ] = fminun(obj,grad,x0,stoptol,algoflag)
         a = 0.15;
 
         while 1
+            % Get the search direction
             g = grad(x);
-            s = -g;
+            s = -g/norm(g);
             
-            % quadratic line search it up in here
+            % Quadratic line search it up in here
             a = linesearch(a,x,s,obj);
-            if a < stoptol
-                a = stoptol;
-            end
             
+            % Update
             x = x + a*s;
-
-            iter = iter + 1;
-            % Check conditons
-            if ((a <= stoptol) || (nobj >= maxEval))
-                fprintf('Steepest descent exiting...\n');
-                break;
-            end
-        end
-    elseif algoflag == 2 % conjugate gradient
-        
-        % Initialize and perform first step
-        a = 0.15;
-        x = x0;
-        g = grad(x);
-        s = -g;
-        x = x + a*s;
-        gp = g;
-        
-        iter = 1;
-        while 1
             
-            g = grad(x);
-            beta = dot(g,g)/dot(gp,gp);
-            s = -g + beta*s;
-            
-            % quadratic line search it up in here
-            a = linesearch(a,x,s,obj);
-            x = x + a*s;
-            gp = g;
-            
-            iter = iter + 1;
-            % Check conditons
-            if ((a <= stoptol) || (nobj >= maxEval))
-                fprintf('Steepest descent exiting...\n');
-                break;
-            end
-        end
-        
-    else % quasi-newton
-        
-        x = x0;
-        a = 0.15;
-        g = grad(x);
-        N = eye(numel(x),numel(x));
-        s = -N*g;
-        a = linesearch(a,x,s,obj);
-        xp = x;
-        x = xp + a*s;
-        dx = x - xp;
-        Np = N;
-        
-        iter = 1;
-        while 1
-            gamma = N*dx;
-            
-            if dx.'*gamma > 0
-                N = Np + (1 + (gamma.'*Np*gamma)/(dx.'*gamma))*((dx*dx.')/(dx.'*gamma)) - (dx*gamma.'*Np + Np*gamma*dx.')/(dx.'*gamma);
-            else
-                N = Np;
-            end
-            
-            g = grad(x);
-            s = -N*g;
-            xp = x;
-            a = linesearch(a,x,s,obj);
-            x = xp + a*s;
-            dx = x - xp;
-            Np = N;
-            
-            iter = iter + 1;
-            % Check conditons
-            %if ((a <= stoptol) || (nobj >= maxEval))
+            % Check conditions
             if (all(abs(g) <= stoptol) || (nobj >= maxEval))
                 fprintf('Steepest descent exiting...\n');
                 break;
             end
+            
+            iter = iter + 1;
+        end
+    elseif algoflag == 2 % conjugate gradient
+        
+        % Initialize and perform first step (because we have no initial
+        % conditions...)
+        
+        % Guess initial alpha and initial point
+        a = 0.15;
+        x = x0;
+        
+        % Find search direction (use steepest descent)
+        g = grad(x);
+        s = -g;
+        
+        % Qaudratic linesearch
+        a = linesearch(a,x,s,obj);
+        
+        % Update
+        x = x + a*s;
+        
+        % Initialize initial conditions
+        gp = g;
+        
+        iter = 1; % That counted as an iteration
+        while 1
+            % Find the search direction
+            g = grad(x);
+            beta = dot(g,g)/dot(gp,gp);
+            s = -g + beta*s;
+            
+            % Quadratic line search it up in here
+            a = linesearch(a,x,s,obj);
+            
+            % Update
+            x = x + a*s;
+            
+            % Update previous values for next iteration
+            gp = g;
+
+            % Check conditions
+            if (all(abs(g) <= stoptol) || (nobj >= maxEval))
+                fprintf('Conjugate gradient exiting...\n');
+                break;
+            end
+            
+            iter = iter + 1;
+        end
+        
+    else % quasi-newton
+        
+        % Guess initial point and alpha
+        x = x0;
+        a = 0.15;
+        
+        % Find the search direction
+        g = grad(x);
+        N = eye(numel(x),numel(x)); % I
+        s = -N*g;
+        
+        % Quadratic linesearch
+        a = linesearch(a,x,s,obj);
+        xp = x;
+        
+        % Update
+        x = xp + a*s;
+        
+        % Get some initial conditions initialized
+        dx = x - xp;
+        Np = N;
+        gp = g;
+        
+        iter = 1; % that counts as an iteration
+        while 1
+            
+            % Let's find a search direction
+            g = grad(x);
+            gamma = g - gp;
+            if (dx.'*gamma > 0)
+                N = Np + (1 + (gamma.'*Np*gamma)/(dx.'*gamma))*((dx*dx.')/(dx.'*gamma)) - (dx*gamma.'*Np + Np*gamma*dx.')/(dx.'*gamma);
+            else
+                % ************************** Skip the update
+                N = Np;
+                %continue;
+            end
+            
+            s = -N*g;
+            
+            % Quadratic linesearch
+            a = linesearch(a,x,s,obj);
+            
+            % Update
+            xp = x;
+            x = xp + a*s;
+            
+            % Get things ready for the next time around
+            dx = x - xp;
+            Np = N;
+            gp = g;
+            
+            % Check conditons
+            if (all(abs(g) <= stoptol) || (nobj >= maxEval))
+                fprintf('BFGS exiting...\n');
+                break;
+            end
+            
+            iter = iter + 1;
         end
     end
 
@@ -189,6 +226,9 @@ function [ xopt,fopt,exitflag ] = fminun(obj,grad,x0,stoptol,algoflag)
     else
         exitflag = 0;
     end
+    
+    % Collect all the history and package it up real nice
+    h = [];
 end
 
 function [ a ] = linesearch(a,x,s,obj)
