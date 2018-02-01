@@ -1,4 +1,4 @@
-function [ a ] = nonmonotone(s,g0,x0,obj)
+function [ a,C,Q ] = nonmonotone(s,g0,x0,obj,C,Q)
     %% Params
     % 0 < nmin <= nmax < 1
     nmin = 1/2; nmax = 1.2;
@@ -13,27 +13,26 @@ function [ a ] = nonmonotone(s,g0,x0,obj)
     delmin = .5*(1 - nmax)*delmax;
     
     % amax > 0
-    amax = 9;
+    amax = 100;
     
     % M > 1
-    M = 500;
+    M = 2;
     
-    % Initialize
-    %C = []; Q = []; d = []; x = []; g = [];
-    
-    k = 1;
-    C(k) = obj(x0);
-    Q(k) = 1;
+    % Initialize    
+    %k = 1;
+    k = numel(Q);
+    %C(k) = obj(x0);
+    %Q(k) = 1;
     d(:,k) = s;
     x(:,k) = x0;
     g(:,k) = g0;
     
     %% Algorithm (1)
     % Choose nk \in [nmin,nmax], usually away from 1
-    nbar(k) = nmin;
+    nbar(k) = (nmin+nmax)/2;
     
     % Choose trial step size
-    abar(k) = amax; % ak < amax
+    abar(k) = amax-1; % ak < amax
     
     % Compute Qk+1
     Qbar(k+1) = nbar(k)*Q(k) + 1;
@@ -61,7 +60,7 @@ function [ a ] = nonmonotone(s,g0,x0,obj)
     ybar(:,1) = x(:,k) + ahat(1)*d(:,k);
     fbar(1) = obj(ybar(:,1));
     Chat(1) = (nbar(k)*Q(k)*C(k) + fbar(1))/Qbar(k+1);
-    Cbar(1) = max( max( C(max(1,k-M+3):k ),Chat(1)));
+    Cbar(1) = max( max( C(max(1,k-M+2):k ),Chat(1)));
     
     %% Algorithm (8)
     if (fbar(1) <= Cbar(1))
@@ -76,7 +75,7 @@ function [ a ] = nonmonotone(s,g0,x0,obj)
     else
         ahat(2) = abar(k)*rho^hbar(k);
         
-        while (obj(x(:,k) + ahat(2)*d(:,k)) > Cl(k) + del(k)*ahat(2)*g(:,k).'*d(:,k))
+        while (obj(x(:,k) + ahat(2)*d(:,k)) > (Cl(k) + del(k)*ahat(2)*g(:,k).'*d(:,k)))
             hbar(k) =  hbar(k) + 1;
             ahat(2) = abar(k)*rho^hbar(k);
         end
@@ -84,7 +83,7 @@ function [ a ] = nonmonotone(s,g0,x0,obj)
         % Compute y2,f2,C2
         ybar(:,2) = x(:,k) + ahat(2)*d(:,k);
         fbar(2) = obj(ybar(:,2));
-        Cbar(2) = max( max(C(max(1,k-M+3):k),fbar(2)));
+        Cbar(2) = max( max(C(max(1,k-M+2):k),fbar(2)));
         
         % return these values
         a(k) = ahat(2);

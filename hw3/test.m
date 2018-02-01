@@ -88,7 +88,6 @@ function [ xopt,fopt,exitflag,h ] = fminun(obj,grad,x0,stoptol,algoflag)
         
         % initial conditions
         x = x0;
-        a = 9;
         
         C(1) = obj(x0);
         Q(1) = 1;
@@ -96,14 +95,14 @@ function [ xopt,fopt,exitflag,h ] = fminun(obj,grad,x0,stoptol,algoflag)
         while 1
             % Get the search direction
             g = grad(x);
-            s = -g/norm(g);
+            s = -g;%/norm(g);
             
             % Quadratic line search it up in here
             %a = linesearch(a,x,s,obj);
             %a = get_alpha(a,x,obj(x),g,s,obj,grad);
             %a = backtracking(a,x,s,g,obj);
             %a = nocedalwright(a,x,s,g,obj,grad);
-            [ a ] = nonmonotone(s,g,x,obj);
+            [ a,C,Q ] = nonmonotone(s,g,x,obj,C,Q);
             
             % Update
             x = x + a*s;
@@ -123,6 +122,8 @@ function [ xopt,fopt,exitflag,h ] = fminun(obj,grad,x0,stoptol,algoflag)
         
         % Guess initial alpha and initial point
         a = 0.15;
+        %C(1) = obj(x0);
+        %Q(2) = 1;
         x = x0;
         
         % Find search direction (use steepest descent)
@@ -130,8 +131,8 @@ function [ xopt,fopt,exitflag,h ] = fminun(obj,grad,x0,stoptol,algoflag)
         s = -g;
         
         % Qaudratic linesearch
-        %a = linesearch(a,x,s,obj);
-        a = nonmonotone(s,g,x,obj);
+        a = linesearch(a,x,s,obj);
+        %[ a,C,Q ] = nonmonotone(s,g,x,obj,C,Q);
         
         % Update
         x = x + a*s;
@@ -148,6 +149,7 @@ function [ xopt,fopt,exitflag,h ] = fminun(obj,grad,x0,stoptol,algoflag)
             
             % Quadratic line search it up in here
             a = linesearch(a,x,s,obj);
+            %[ a,C,Q ] = nonmonotone(s,g,x,obj,C,Q);
             
             % Update
             x = x + a*s;
