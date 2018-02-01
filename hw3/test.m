@@ -34,7 +34,7 @@ disp(table(fopt,exitflag,nobj,ngrad));
 
 
 fprintf('We were actaully looking for...\n');
-options = optimoptions('fminunc','Algorithm','trust-region','SpecifyObjectiveGradient',true,'StepTolerance',eps,'MaxFunctionEvaluations',500,'MaxIterations',Inf);
+options = optimoptions('fminunc','Display','iter','Algorithm','quasi-newton','SpecifyObjectiveGradient',true,'StepTolerance',eps,'MaxFunctionEvaluations',500,'MaxIterations',Inf);
 [ x,f ] = fminunc(@(x) fminunc_obj(x),x0,options);
 disp(table(x0,x,grad(x)));
 disp(table(f));
@@ -80,7 +80,7 @@ end
 
 function [ xopt,fopt,exitflag,h ] = fminun(obj,grad,x0,stoptol,algoflag)
     global nobj;
-    maxEval = 500;
+    maxEval = 5000;
     iter = 0;
 
     if algoflag == 1 % steepest descent
@@ -245,28 +245,32 @@ function [a,b,alpha] = bracketing(alpha,x0,f0,g0,s,obj,grad)
 
     % Let's choose some values
     tau = 9; % typical value for  tau > 1
-    sigma = 0.1; % 0.9 => weak line search, .1 => fairly accurate
+    sigma = 0.9; % 0.9 => weak line search, .1 => fairly accurate
     rho = 0.01; % is typical
-    fbar = 0; % lower bound on f(alpha); 0 for nonlinear ls problem
-    mu = (fbar - f0)/(rho*s.'*g0);
+    fbar = -1e6; % lower bound on f(alpha); 0 for nonlinear ls problem
+    fprime0 = s.'*g0;
+    mu = (fbar - f0)/(rho*fprime0);
     
     
     % Initial conditions
     fp = f0;
-    alphap = alpha;
-    %gp = g0;
+    %alphap = alpha;
+    alphap = 0;
+    alpha = 9;
+    
     
     tflag = 0;
     % Start looping till we get an alpha or an iterval a,b
     while 1
         f = obj(x0 + alpha*s);
         
-        if f <= f0
+        if f <= fbar
             % terminate for good!
             tflag = 1;
             break;
         end
-        if ((f > (f0 + alpha*s.'*g0)) || (f >= fp))
+        
+        if ((f > (f0 + alpha*fprime0)) || (f >= fp))
             a = alphap;
             b = alpha;
             % terminate
@@ -274,12 +278,13 @@ function [a,b,alpha] = bracketing(alpha,x0,f0,g0,s,obj,grad)
         end
         
         g = grad(x0 + alpha*s);
-        if (abs(g) <= -sigma*g0)
+        fprime = s.'*g;
+        if (abs(fprime) <= -sigma*fprime0)
             % terminate
             break;
         end
         
-        if (g >= 0)
+        if (fprime >= 0)
             a = alpha;
             b = alphap;
             % terminate
@@ -287,11 +292,8 @@ function [a,b,alpha] = bracketing(alpha,x0,f0,g0,s,obj,grad)
         end
         
         if (mu <= (2*alpha - alphap))
-            alphap = alpha;
             alpha = mu;
-        else
-            alphap = alpha;
-            
+        else            
             % Choose alpha to minimize in the given interval a cubic
             % polynomial interpolating f(alpha),grad(alpha),f(alphap), and
             % grad(alphap).
@@ -299,7 +301,12 @@ function [a,b,alpha] = bracketing(alpha,x0,f0,g0,s,obj,grad)
             %cp = interp1([],
             
             % Well, since we can choose any way, I choose random for now
-            alpha = (ab(2) - ab(1)).*rand(1,1) + ab(1);
+            %alpha = (ab(2) - ab(1)).*rand(1,1) + ab(1);
+            %alpha = ab(end);
+            ffit = interp1(ab,[obj(x0 + a*s),s.'*grad(x0 + a*s),obj(x0 + b*s),s.'*grad(x0 + b*s)].','poly3');
+            xs = linspace(min(ab),max(ab),1000);
+            val = polyval(ffit,xs);
+            alpha = xs(find(min(val)));
         end
         
         alphap = alpha;
@@ -322,44 +329,55 @@ function [ alpha ] = get_alpha(alpha,x0,f0,g0,s,obj,grad)
     if ~isnan(alpha_try)
         alpha = alpha_try;
         return;
+    else
+        alpha = 9;
     end
     
     % Set some parameters
     % 0 < tau2 < tau3 <= 1/2
     tau2 = 1/10; % typical, tau2 <= sigma is  advisable
     tau3 = 1/2; % algorithm is insensitive to tau2,tau3
-    rho = 0.1;
+    rho = 0.01;
+    fprime0 = s.'*g0;
+    sigma = 0.9;
     
     % Loop until we find acceptable alpha
     while 1
         
         % Sensible to minimize in the given interval a quadratic or cubic
-        % polynomial which interpolates f(a),grad(a),f(b),grad(b) if known
+        % polynomial which interpolates f(a),f'(a),f(b),f'(b) if known
         ab = [ (alpha + tau2*(b - a)), (b - tau3*(b - a)) ];
-        alpha = (ab(2) - ab(1)).*rand(1,1) + ab(1);
+        %alpha = (ab(2) - ab(1)).*rand(1,1) + ab(1);
+        %alpha = max(ab);
+        ffit = interp1(ab,[obj(x0 + a*s),s.'*grad(x0 + a*s),obj(x0 + b*s),s.'*grad(x0 + b*s)].','poly3');
+        xs = linspace(min(ab),max(ab),1000);
+        val = polyval(ffit,xs);
+        alpha = xs(find(min(val)));
+
         
         f = obj(x0 + alpha*s);
         fa = obj(x0 + a*s);
         
-        if ((f > (f0 + rho*alpha*s.'*g0)) || (f >= fa))
-            a = a;
+        if ((f > (f0 + rho*alpha*fprime0)) || (f >= fa))
+            %a = a;
             b = alpha;
         else
-            g = grad(alpha);
+            g = grad(x0 + alpha*s);
+            fprime = s.'*g;
             
-            if (abs(g) <= -sigma*g0)
+            if (abs(fprime) <= -sigma*fprime0)
                 % terminate
                 break;
             end
             
+            ap = a;
             a = alpha;
             
-            if ((b - a)*g >= 0)
-                b = a;
+            if ((b - a)*fprime >= 0)
+                b = ap;
             else
-                b = b;
+                %b = b;
             end
         end
     end
-    
 end
