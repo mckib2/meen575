@@ -13,7 +13,7 @@ testflag = 1;
 % 1 => steepest descent
 % 2 => conjugate gradient
 % 3 => BFGS
-algoflag = 1;
+algoflag = 2;
 
 if testflag == 1
     x0 = [10,10,10].';
@@ -78,16 +78,20 @@ function [ g ] = grad(x)
     ngrad = ngrad + 1;
 end
 
+
 function [ xopt,fopt,exitflag,h ] = fminun(obj,grad,x0,stoptol,algoflag)
     global nobj;
-    maxEval = 5000;
+    maxEval = 50000;
     iter = 0;
 
     if algoflag == 1 % steepest descent
         
         % initial conditions
         x = x0;
-        a = 0.15;
+        a = 9;
+        
+        C(1) = obj(x0);
+        Q(1) = 1;
 
         while 1
             % Get the search direction
@@ -96,7 +100,10 @@ function [ xopt,fopt,exitflag,h ] = fminun(obj,grad,x0,stoptol,algoflag)
             
             % Quadratic line search it up in here
             %a = linesearch(a,x,s,obj);
-            a = get_alpha(a,x,obj(x),g,s,obj,grad);
+            %a = get_alpha(a,x,obj(x),g,s,obj,grad);
+            %a = backtracking(a,x,s,g,obj);
+            %a = nocedalwright(a,x,s,g,obj,grad);
+            [ a ] = nonmonotone(s,g,x,obj);
             
             % Update
             x = x + a*s;
@@ -123,7 +130,8 @@ function [ xopt,fopt,exitflag,h ] = fminun(obj,grad,x0,stoptol,algoflag)
         s = -g;
         
         % Qaudratic linesearch
-        a = linesearch(a,x,s,obj);
+        %a = linesearch(a,x,s,obj);
+        a = nonmonotone(s,g,x,obj);
         
         % Update
         x = x + a*s;
