@@ -6,7 +6,7 @@ function [ a_good ] = iter_linsearch(x0,s,obj)
     t = 1.2; % factor of increase, need not be 2
     n = numel(x0);
     
-    tol = 1e-10;
+    tol = 1e-4;
     a_good = 1e6; a_test = 0;
     
     % Keep fitting the parabola till the change in the min is very small
