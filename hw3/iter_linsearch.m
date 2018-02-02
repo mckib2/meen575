@@ -1,9 +1,9 @@
-function [ a_good ] = iter_linsearch(x0,s,a0,obj)
-    a0 = 1;
+function [ a_good ] = iter_linsearch(x0,s,obj)
+    a0 = 1; % always start with a guess of 1
 
     f = [ obj(x0) obj(x0 + a0*s) ]; % initial conditions
     a = [ 0 a0 ];
-    t = 1.3; % factor of increase
+    t = 1.2; % factor of increase, need not be 2
     n = numel(x0);
     
     tol = 1e-10;
@@ -13,7 +13,7 @@ function [ a_good ] = iter_linsearch(x0,s,a0,obj)
     while (abs(a_good - a_test) > tol)
         a_test = a_good;
         
-        while ((f(end) < f(end-1)) || (numel(unique(f)) < n+2))
+        while ((f(end) < f(end-1)) || (numel(unique(f)) < n+1))
             if (a(end) == 0)
                 if a_good == 0
                     a(end) = 20*eps0;

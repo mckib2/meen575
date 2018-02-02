@@ -32,7 +32,7 @@ function [ a ] = exact_linsearch(x0,s,a0,obj)
             % Use a cubic fit
             cfun = fit(a.',f.','poly3');
             
-            xs = linspace(0+20*eps,5,1e7);
+            xs = linspace(0+20*eps,2,1e7);
             [ ~,idx ] = min(cfun(xs));
             a = xs(idx);
         end
