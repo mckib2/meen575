@@ -1,7 +1,7 @@
 function [ a_good ] = iter_linsearch(x0,s,obj)
     a0 = 1; % always start with a guess of 1
-
-    f = [ obj(x0) obj(x0 + a0*s) ]; % initial conditions
+    
+    f = [ lookup(x0,obj) lookup(x0 + a0*s,obj) ]; % initial conditions
     a = [ 0 a0 ];
     t = 1.2; % factor of increase, need not be 2
     n = numel(x0);
@@ -28,12 +28,12 @@ function [ a_good ] = iter_linsearch(x0,s,obj)
             end
             
             a(end+1) = a(end)*t;
-            f(end+1) = obj(x0 + a(end)*s);
+            f(end+1) = lookup(x0 + a(end)*s,obj);
         end
 
         % Go back and fill in
         a = [ a(1:end-1) (a(end)+a(end-1))/2 a(end) ];
-        f = [ f(1:end-1) obj(x0 + a(end-1)*s) f(end) ];
+        f = [ f(1:end-1) lookup(x0 + a(end-1)*s,obj) f(end) ];
 
         % Get rid of duplicate values if we have any
         %[ f,idx ] = unique(f,'stable');
@@ -67,7 +67,7 @@ function [ a_good ] = iter_linsearch(x0,s,obj)
             end
         end
         
-        f = [ obj(x0 + a_good*s) f ];
+        f = [ lookup(x0 + a_good*s,obj) f ];
         a = [ a_good a ];
         
         [ f,idx ] = sort(f,'ascend');
@@ -78,3 +78,4 @@ function [ a_good ] = iter_linsearch(x0,s,obj)
     
     a_good = a(1);
 end
+

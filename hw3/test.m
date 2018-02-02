@@ -1,6 +1,12 @@
 clear;
 close all;
 
+% Objective function LUT
+global LUT keyfmt nobj_saved;
+LUT = containers.Map();
+keyfmt = '%.53f %.53f %.53f';
+nobj_saved = 0;
+
 global nobj ngrad testflag ls;
 nobj = 0;
 ngrad = 0;
@@ -14,12 +20,12 @@ ls = 3;
 % 1 => quadratic
 % 2 => rosenbrocks
 % 3 => book example
-testflag = 1;
+testflag = 2;
 
 % 1 => steepest descent
 % 2 => conjugate gradient
 % 3 => BFGS
-algoflag = 2;
+algoflag = 3;
 
 if testflag == 1
     x0 = [10,10,10].';
@@ -36,7 +42,7 @@ end
 [xopt,fopt,exitflag,h] = fminun(@obj,@grad,x0,stoptol,algoflag);
 fprintf('Efficiency: %f\n',nobj + numel(x0)*ngrad);
 disp(table(x0,xopt,grad(xopt)));
-disp(table(fopt,exitflag,nobj,ngrad));
+disp(table(fopt,exitflag,nobj,nobj_saved,ngrad));
 
 
 fprintf('We were actaully looking for...\n');
@@ -103,7 +109,7 @@ function [ a,C,Q ] = stepsize(x,s,a,obj,C,Q)
 end
 
 function [ xopt,fopt,exitflag,h ] = fminun(obj,grad,x0,stoptol,algoflag)
-    global nobj;
+    global nobj ls;
     maxEval = 500;
     iter = 0;
 
@@ -117,7 +123,11 @@ function [ xopt,fopt,exitflag,h ] = fminun(obj,grad,x0,stoptol,algoflag)
         a = .15;
         
         % nonmonotonic initial conditions
-        C(1) = obj(x0);
+        if ls == 4
+            C(1) = obj(x0);
+        else
+            C = [];
+        end
         Q(1) = 1;
 
         while 1
@@ -125,14 +135,9 @@ function [ xopt,fopt,exitflag,h ] = fminun(obj,grad,x0,stoptol,algoflag)
             g = grad(x);
             s = -g;
             
+            % Do linesearch to get the step size, set by global flag, `ls`
             [ a,C,Q ] = stepsize(x,s,a,obj,C,Q);
             
-            % Still working on these ones:
-            %a = get_alpha(a,x,obj(x),g,s,obj,grad);
-            %a = backtracking(a,x,s,g,obj);
-            %a = nocedalwright(a,x,s,g,obj,grad);
-            
-
             % Update
             x = x + a*s;
             
@@ -153,7 +158,11 @@ function [ xopt,fopt,exitflag,h ] = fminun(obj,grad,x0,stoptol,algoflag)
         a = 0.15;
         
         % monotonic line search initializations
-        C(1) = obj(x0);
+        if ls == 4
+            C(1) = obj(x0);
+        else
+            C = [];
+        end
         Q(2) = 1;
         
 
@@ -161,12 +170,6 @@ function [ xopt,fopt,exitflag,h ] = fminun(obj,grad,x0,stoptol,algoflag)
         x = x0;
         g = grad(x);
         s = -g;
-        
-        % Qaudratic linesearch
-        %a = linesearch(a,x,s,obj);
-        %[ a,C,Q ] = nonmonotone(s,g,x,obj,C,Q);
-        %a = exact_linsearch(x,s,a,obj);
-        %a = iter_linsearch(x,s,obj);
         
         % Get the stepsize using the linesearch method given by ls flag
         [ a,C,Q ] = stepsize(x,s,a,obj,C,Q);
@@ -183,13 +186,7 @@ function [ xopt,fopt,exitflag,h ] = fminun(obj,grad,x0,stoptol,algoflag)
             g = grad(x);
             beta = dot(g,g)/dot(gp,gp);
             s = -g + beta*s;
-            
-            % Quadratic line search it up in here
-            %a = linesearch(a,x,s,obj);
-            %[ a,C,Q ] = nonmonotone(s,g,x,obj,C,Q);
-            %a = exact_linsearch(x,s,a,obj);
-            %a = iter_linsearch(x,s,obj);
-            
+
             [ a,C,Q ] = stepsize(x,s,a,obj,C,Q);
             
             % Update
@@ -214,17 +211,19 @@ function [ xopt,fopt,exitflag,h ] = fminun(obj,grad,x0,stoptol,algoflag)
         a = 0.15;
         
         % nonmonotonic line search initialization
-        C(1) = obj(x0);
+        if ls == 4
+            C(1) = obj(x0);
+        else
+            C = [];
+        end
         Q(2) = 1;
         
         % Find the search direction
         g = grad(x);
         N = eye(numel(x),numel(x)); % I
         s = -N*g;
-        
-        % Quadratic linesearch
-        %a = linesearch(a,x,s,obj);
-        %a = iter_linsearch(x,s,obj);
+
+        % Line search to get stepsize
         [ a,C,Q ] = stepsize(x,s,a,obj,C,Q);
         
         xp = x;
@@ -246,17 +245,13 @@ function [ xopt,fopt,exitflag,h ] = fminun(obj,grad,x0,stoptol,algoflag)
             if (dx.'*gamma > 0)
                 N = Np + (1 + (gamma.'*Np*gamma)/(dx.'*gamma))*((dx*dx.')/(dx.'*gamma)) - (dx*gamma.'*Np + Np*gamma*dx.')/(dx.'*gamma);
             else
-                % ************************** Skip the update
+                % Skip the update of N
                 N = Np;
-                %continue;
             end
             
             s = -N*g;
             
-            % Quadratic linesearch
-            %a = linesearch(a,x,s,obj);
-            %a = iter_linsearch(x,s,obj);
-            
+            % Do the linesearch
             [ a,C,Q ] = stepsize(x,s,a,obj,C,Q);
             
             % Update
@@ -280,7 +275,7 @@ function [ xopt,fopt,exitflag,h ] = fminun(obj,grad,x0,stoptol,algoflag)
 
     % Get all the output nice and wrapped up
     xopt = x;
-    fopt = obj(xopt);
+    fopt = lookup(xopt,obj);
     fprintf('Total iterations: %d\n',iter);
     
     if (nobj > maxEval)
