@@ -8,12 +8,12 @@ ngrad = 0;
 % 1 => quadratic
 % 2 => rosenbrocks
 % 3 => book example
-testflag = 1;
+testflag = 2;
 
 % 1 => steepest descent
 % 2 => conjugate gradient
 % 3 => BFGS
-algoflag = 2;
+algoflag = 3;
 
 if testflag == 1
     x0 = [10,10,10].';
@@ -81,16 +81,17 @@ end
 
 function [ xopt,fopt,exitflag,h ] = fminun(obj,grad,x0,stoptol,algoflag)
     global nobj;
-    maxEval = 50000;
+    maxEval = 500;
     iter = 0;
 
     if algoflag == 1 % steepest descent
         
         % initial conditions
         x = x0;
+        a = .15;
         
-        C(1) = obj(x0);
-        Q(1) = 1;
+        %C(1) = obj(x0);
+        %Q(1) = 1;
 
         while 1
             % Get the search direction
@@ -102,7 +103,9 @@ function [ xopt,fopt,exitflag,h ] = fminun(obj,grad,x0,stoptol,algoflag)
             %a = get_alpha(a,x,obj(x),g,s,obj,grad);
             %a = backtracking(a,x,s,g,obj);
             %a = nocedalwright(a,x,s,g,obj,grad);
-            [ a,C,Q ] = nonmonotone(s,g,x,obj,C,Q);
+            %[ a,C,Q ] = nonmonotone(s,g,x,obj,C,Q);
+            %a = exact_linsearch(x,s,a,obj);
+            a = iter_linsearch(x,s,a,obj);
             
             % Update
             x = x + a*s;
@@ -131,8 +134,10 @@ function [ xopt,fopt,exitflag,h ] = fminun(obj,grad,x0,stoptol,algoflag)
         s = -g;
         
         % Qaudratic linesearch
-        a = linesearch(a,x,s,obj);
+        %a = linesearch(a,x,s,obj);
         %[ a,C,Q ] = nonmonotone(s,g,x,obj,C,Q);
+        %a = exact_linsearch(x,s,a,obj);
+        a = iter_linsearch(x,s,a,obj);
         
         % Update
         x = x + a*s;
@@ -148,8 +153,10 @@ function [ xopt,fopt,exitflag,h ] = fminun(obj,grad,x0,stoptol,algoflag)
             s = -g + beta*s;
             
             % Quadratic line search it up in here
-            a = linesearch(a,x,s,obj);
+            %a = linesearch(a,x,s,obj);
             %[ a,C,Q ] = nonmonotone(s,g,x,obj,C,Q);
+            %a = exact_linsearch(x,s,a,obj);
+            a = iter_linsearch(x,s,a,obj);
             
             % Update
             x = x + a*s;
@@ -178,7 +185,8 @@ function [ xopt,fopt,exitflag,h ] = fminun(obj,grad,x0,stoptol,algoflag)
         s = -N*g;
         
         % Quadratic linesearch
-        a = linesearch(a,x,s,obj);
+        %a = linesearch(a,x,s,obj);
+        a = iter_linsearch(x,s,a,obj);
         xp = x;
         
         % Update
@@ -206,7 +214,8 @@ function [ xopt,fopt,exitflag,h ] = fminun(obj,grad,x0,stoptol,algoflag)
             s = -N*g;
             
             % Quadratic linesearch
-            a = linesearch(a,x,s,obj);
+            %a = linesearch(a,x,s,obj);
+            a = iter_linsearch(x,s,a,obj);
             
             % Update
             xp = x;
