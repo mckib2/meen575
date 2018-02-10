@@ -24,18 +24,18 @@ function [ a ] = exact_linsearch(x0,s,a0,obj)
     % I see people switching between quadratic and cubic fits, so I will,
     % too
     try
-        if (n <= 2)
+%         if (n <= 2)
             % Assume quadratic
             a = (f(1)*(a(2)^2 - a(3)^2) + f(2)*(a(3)^2 - a(1)^2) + f(3)*(a(1)^2 - a(2)^2))/ ...
                 (2*(f(1)*(a(2) - a(3)) + f(2)*(a(3) - a(1)) + f(3)*(a(1) - a(2))));
-        else
-            % Use a cubic fit
-            cfun = fit(a.',f.','poly3');
-            
-            xs = linspace(0+20*eps,2,1e7);
-            [ ~,idx ] = min(cfun(xs));
-            a = xs(idx);
-        end
+%         else
+%             % Use a cubic fit
+%             cfun = fit(a.',f.','poly3');
+%             
+%             xs = linspace(0+20*eps,2,1e7);
+%             [ ~,idx ] = min(cfun(xs));
+%             a = xs(idx);
+%         end
     catch
         fprintf('caught one');
     end

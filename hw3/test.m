@@ -15,6 +15,9 @@ ngrad = 0;
 % 2 => exact line search (as in book)
 % 3 => iterative exact line search (best)
 % 4 => nonmonotonic line search (inexact method)
+% 5 => Golden section algorithm
+% 6 => Powell's interpolation algorithm
+% 7 => Inexact
 ls = 3;
 
 % 1 => quadratic
@@ -25,7 +28,7 @@ testflag = 2;
 % 1 => steepest descent
 % 2 => conjugate gradient
 % 3 => BFGS
-algoflag = 3;
+algoflag = 2;
 
 if testflag == 1
     x0 = [10,10,10].';
@@ -44,7 +47,20 @@ fprintf('Efficiency: %f\n',nobj + numel(x0)*ngrad);
 disp(table(x0,xopt,grad(xopt)));
 disp(table(fopt,exitflag,nobj,nobj_saved,ngrad));
 
+%% Let's look at how everything went
+figure(1);
+[X,Y] = meshgrid(linspace(min(h.x(1,:))-1,max(h.x(1,:)+1)), ...
+    linspace(min(h.x(2,:))-1,max(h.x(2,:))+1));
+if numel(x0) > 2
+    Z = meshgrid(linspace(min(h.x(3,:))-1,max(h.x(3,:))+1));
+else
+    Z = [];
+end
+f = cobj(X,Y,Z);
+contour(X,Y,f); hold on;
+plot(h.x(1,:),h.x(2,:),'.-');
 
+%%
 fprintf('We were actaully looking for...\n');
 options = optimoptions('fminunc','Display','iter','Algorithm','quasi-newton','SpecifyObjectiveGradient',true,'StepTolerance',eps,'MaxFunctionEvaluations',500,'MaxIterations',Inf);
 [ x,f ] = fminunc(@(x) fminunc_obj(x),x0,options);
@@ -65,6 +81,18 @@ function [ f ] = obj(x)
     end
     
     nobj = nobj + 1;
+end
+
+function [ f ] = cobj(X,Y,Z)
+    global testflag;
+    
+    if testflag == 1
+        f = 20 + 3*X - 6*Y + 8*Z + 6*X.^2 - 2*X.*Y - X.*Z + Y.^2 + 0.5*Z.^2;
+    elseif testflag == 2
+        f = 100*(Y - X.^2).^2 + (1 - X).^2;
+    elseif testflag == 3
+        f = X.^2 - 2*X.*Y + 4*Y.^2;
+    end
 end
 
 function [ f,g ] = fminunc_obj(x)
@@ -90,7 +118,7 @@ function [ g ] = grad(x)
     ngrad = ngrad + 1;
 end
 
-function [ a,C,Q ] = stepsize(x,s,a,obj,C,Q)
+function [ a,C,Q ] = stepsize(x,s,a,obj,C,Q,g)
     global ls;
 
     if (ls == 1)
@@ -104,6 +132,12 @@ function [ a,C,Q ] = stepsize(x,s,a,obj,C,Q)
         a = iter_linsearch(x,s,obj);
     elseif (ls == 4)
         [ a,C,Q ] = nonmonotone(s,g,x,obj,C,Q);
+    elseif (ls == 5)
+        [ a,~ ] = goldensection(x,s,obj);
+    elseif (ls == 6)
+        [ a ] = powell(x,s,obj);
+    elseif (ls == 7)
+        [ a ] = inexact(x,s,g,obj);
     end
 
 end
@@ -117,6 +151,7 @@ function [ xopt,fopt,exitflag,h ] = fminun(obj,grad,x0,stoptol,algoflag)
         
         % initial conditions
         x = x0;
+        h.x(:,1) = x;
         
         % iter_linsearch always starts with a0 = 1, but other methods may
         % have an initial guess given in arguments
@@ -136,10 +171,13 @@ function [ xopt,fopt,exitflag,h ] = fminun(obj,grad,x0,stoptol,algoflag)
             s = -g;
             
             % Do linesearch to get the step size, set by global flag, `ls`
-            [ a,C,Q ] = stepsize(x,s,a,obj,C,Q);
+            [ a,C,Q ] = stepsize(x,s,a,obj,C,Q,g);
             
             % Update
             x = x + a*s;
+            
+            % Save the history
+            h.x(:,iter+2) = x;
             
             % Check conditions
             if (all(abs(g) <= stoptol) || (nobj >= maxEval))
@@ -168,14 +206,16 @@ function [ xopt,fopt,exitflag,h ] = fminun(obj,grad,x0,stoptol,algoflag)
 
         % Find search direction (use steepest descent)
         x = x0;
+        h.x(:,1) = x;
         g = grad(x);
         s = -g;
         
         % Get the stepsize using the linesearch method given by ls flag
-        [ a,C,Q ] = stepsize(x,s,a,obj,C,Q);
+        [ a,C,Q ] = stepsize(x,s,a,obj,C,Q,g);
         
         % Update
         x = x + a*s;
+        h.x(:,2) = x;
         
         % Initialize initial conditions
         gp = g;
@@ -187,10 +227,11 @@ function [ xopt,fopt,exitflag,h ] = fminun(obj,grad,x0,stoptol,algoflag)
             beta = dot(g,g)/dot(gp,gp);
             s = -g + beta*s;
 
-            [ a,C,Q ] = stepsize(x,s,a,obj,C,Q);
+            [ a,C,Q ] = stepsize(x,s,a,obj,C,Q,g);
             
             % Update
             x = x + a*s;
+            h.x(:,iter+2) = x;
             
             % Update previous values for next iteration
             gp = g;
@@ -223,13 +264,18 @@ function [ xopt,fopt,exitflag,h ] = fminun(obj,grad,x0,stoptol,algoflag)
         N = eye(numel(x),numel(x)); % I
         s = -N*g;
 
+        print_head();
+        print_iter(iter,obj(x),0,norm(g,Inf));
+        
         % Line search to get stepsize
-        [ a,C,Q ] = stepsize(x,s,a,obj,C,Q);
+        [ a,C,Q ] = stepsize(x,s,a,obj,C,Q,g);
         
         xp = x;
+        h.x(:,1) = xp;
         
         % Update
         x = xp + a*s;
+        h.x(:,2) = x;
         
         % Get some initial conditions initialized
         dx = x - xp;
@@ -252,17 +298,19 @@ function [ xopt,fopt,exitflag,h ] = fminun(obj,grad,x0,stoptol,algoflag)
             s = -N*g;
             
             % Do the linesearch
-            [ a,C,Q ] = stepsize(x,s,a,obj,C,Q);
+            [ a,C,Q ] = stepsize(x,s,a,obj,C,Q,g);
             
             % Update
             xp = x;
             x = xp + a*s;
+            h.x(:,iter+2) = x;
             
             % Get things ready for the next time around
             dx = x - xp;
             Np = N;
             gp = g;
             
+            print_iter(iter,obj(xp),a,norm(gp,Inf));
             % Check conditons
             if (all(abs(g) <= stoptol) || (nobj >= maxEval))
                 fprintf('BFGS exiting...\n');
@@ -283,9 +331,6 @@ function [ xopt,fopt,exitflag,h ] = fminun(obj,grad,x0,stoptol,algoflag)
     else
         exitflag = 0;
     end
-    
-    % Collect all the history and package it up real nice
-    h = [];
 end
 
 function [ a ] = linesearch(a,x,s,obj)
