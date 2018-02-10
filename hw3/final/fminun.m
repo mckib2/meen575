@@ -2,12 +2,14 @@
 function [xopt,fopt,exitflag] = fminun(obj,grad,x0,stoptol,algoflag)
 
     % Objective function LUT
-    global LUT keyfmt nobj_saved;
+    global LUT LUTG keyfmt nobj_saved ngrad_saved;
     LUT = containers.Map();
+    LUTG = containers.Map();
     keyfmt = '%.53f %.53f %.53f';
     nobj_saved = 0;
+    ngrad_saved = 0;
 
-    global nobj ls;
+    global nobj ngrad ls;
 
     % 1 => quadratic line search (only fits 3 points)
     % 2 => exact line search (as in book)
@@ -24,10 +26,17 @@ function [xopt,fopt,exitflag] = fminun(obj,grad,x0,stoptol,algoflag)
         % initial conditions
         x = x0;
         h.x(:,1) = x;
+        h.s(:,1) = zeros(size(x));
+        h.nobj(1) = 0;
+        g = lookupg(x,grad);
+        
+        print_head();
+        h.f(1) = print_iter(iter,lookup(x,obj),'','');
         
         % iter_linsearch always starts with a0 = 1, but other methods may
         % have an initial guess given in arguments
         a = .15;
+        h.a(1) = 0;
         
         % nonmonotonic initial conditions
         if ls == 4
@@ -37,21 +46,26 @@ function [xopt,fopt,exitflag] = fminun(obj,grad,x0,stoptol,algoflag)
         end
         Q(1) = 1;
 
+        iter = iter + 1;
         while 1
             % Get the search direction
-            g = grad(x);
+            g = lookupg(x,grad);
             s = -g;
+            h.s(:,iter+1) = s;
             
             % Do linesearch to get the step size, set by global flag, `ls`
             [ a,C,Q ] = stepsize(x,s,a,obj,C,Q,g);
+            h.a(iter+1) = a;
             
             % Update
             x = x + a*s;
             
             % Save the history
-            h.x(:,iter+2) = x;
+            h.x(:,iter+1) = x;
+            h.nobj(iter+1) = nobj;
             
             % Check conditions
+            h.f(iter+1) = print_iter(iter,lookup(x,obj),a,norm(g,Inf));
             if (all(abs(g) <= stoptol) || (nobj >= maxEval))
                 fprintf('Steepest descent exiting...\n');
                 break;
@@ -66,6 +80,7 @@ function [xopt,fopt,exitflag] = fminun(obj,grad,x0,stoptol,algoflag)
         
         % Guess initial alpha and initial point
         a = 0.15;
+        h.a(1) = 0;
         
         % monotonic line search initializations
         if ls == 4
@@ -79,36 +94,50 @@ function [xopt,fopt,exitflag] = fminun(obj,grad,x0,stoptol,algoflag)
         % Find search direction (use steepest descent)
         x = x0;
         h.x(:,1) = x;
-        g = grad(x);
+        h.s(:,1) = zeros(size(x));
+        h.nobj(1) = 0;
+        g = lookupg(x,grad);
         s = -g;
+        
+        print_head();
+        h.f(1) = print_iter(iter,lookup(x,obj),'','');
         
         % Get the stepsize using the linesearch method given by ls flag
         [ a,C,Q ] = stepsize(x,s,a,obj,C,Q,g);
+        h.a(2) = a;
         
         % Update
         x = x + a*s;
         h.x(:,2) = x;
+        h.s(:,2) = s;
+        h.nobj(2) = nobj;
+        
+        h.f(2) = print_iter(1,lookup(x,obj),a,norm(g,Inf));
         
         % Initialize initial conditions
         gp = g;
         
-        iter = 1; % That counted as an iteration
+        iter = 2; % That counted as an iteration
         while 1
             % Find the search direction
-            g = grad(x);
+            g = lookupg(x,grad);
             beta = dot(g,g)/dot(gp,gp);
             s = -g + beta*s;
 
             [ a,C,Q ] = stepsize(x,s,a,obj,C,Q,g);
+            h.a(iter+1) = a;
             
             % Update
             x = x + a*s;
-            h.x(:,iter+2) = x;
+            h.x(:,iter+1) = x;
+            h.s(:,iter+1) = s;
+            h.nobj(iter+1) = nobj;
             
             % Update previous values for next iteration
             gp = g;
 
             % Check conditions
+            h.f(iter+1) = print_iter(iter,lookup(x,obj),a,norm(gp,Inf));
             if (all(abs(g) <= stoptol) || (nobj >= maxEval))
                 fprintf('Conjugate gradient exiting...\n');
                 break;
@@ -122,6 +151,8 @@ function [xopt,fopt,exitflag] = fminun(obj,grad,x0,stoptol,algoflag)
         % Guess initial point and alpha
         x = x0;
         a = 0.15;
+        h.a(1) = 0;
+        h.nobj(1) = 0;
         
         % nonmonotonic line search initialization
         if ls == 4
@@ -132,33 +163,38 @@ function [xopt,fopt,exitflag] = fminun(obj,grad,x0,stoptol,algoflag)
         Q(2) = 1;
         
         % Find the search direction
-        g = grad(x);
+        g = lookupg(x,grad);
         N = eye(numel(x),numel(x)); % I
         s = -N*g;
 
         print_head();
-        print_iter(iter,lookup(x,obj),0,norm(g,Inf));
+        h.f(1) = print_iter(iter,lookup(x,obj),'','');
         
         % Line search to get stepsize
         [ a,C,Q ] = stepsize(x,s,a,obj,C,Q,g);
+        h.a(2) = a;
+        h.nobj(2) = nobj;
         
         xp = x;
         h.x(:,1) = xp;
+        h.s(:,2) = s;
         
         % Update
         x = xp + a*s;
         h.x(:,2) = x;
+        
+        h.f(2) = print_iter(iter,lookup(x,obj),a,norm(g,Inf));
         
         % Get some initial conditions initialized
         dx = x - xp;
         Np = N;
         gp = g;
         
-        iter = 1; % that counts as an iteration
+        iter = 2; % that counts as an iteration
         while 1
             
             % Let's find a search direction
-            g = grad(x);
+            g = lookupg(x,grad);
             gamma = g - gp;
             if (dx.'*gamma > 0)
                 N = Np + (1 + (gamma.'*Np*gamma)/(dx.'*gamma))*((dx*dx.')/(dx.'*gamma)) - (dx*gamma.'*Np + Np*gamma*dx.')/(dx.'*gamma);
@@ -171,18 +207,21 @@ function [xopt,fopt,exitflag] = fminun(obj,grad,x0,stoptol,algoflag)
             
             % Do the linesearch
             [ a,C,Q ] = stepsize(x,s,a,obj,C,Q,g);
+            h.a(iter+1) = a;
+            h.nobj(iter+1) = nobj;
             
             % Update
             xp = x;
             x = xp + a*s;
-            h.x(:,iter+2) = x;
+            h.x(:,iter+1) = x;
+            h.s(:,iter+1) = s;
             
             % Get things ready for the next time around
             dx = x - xp;
             Np = N;
             gp = g;
             
-            print_iter(iter,lookup(xp,obj),a,norm(gp,Inf));
+            h.f(iter+1) = print_iter(iter,lookup(xp,obj),a,norm(gp,Inf));
             % Check conditons
             if (all(abs(g) <= stoptol) || (nobj >= maxEval))
                 fprintf('BFGS exiting...\n');
@@ -197,6 +236,7 @@ function [xopt,fopt,exitflag] = fminun(obj,grad,x0,stoptol,algoflag)
     xopt = x;
     fopt = lookup(xopt,obj);
     fprintf('Total iterations: %d\n',iter);
+    fprintf('Efficiency: %f\n',nobj + numel(x0)*ngrad);
     
     if (nobj > maxEval)
         exitflag = 1;
@@ -213,9 +253,14 @@ function [xopt,fopt,exitflag] = fminun(obj,grad,x0,stoptol,algoflag)
     else
         Z = [];
     end
+    
     f = cobj(X,Y,Z);
     contour(X,Y,f); hold on;
     plot(h.x(1,:),h.x(2,:),'.-');
+    
+    % Make some tables
+    disp(table((0:size(h.x,2)-1).',h.x.',h.f.',h.s.',h.a.',h.nobj.', ...
+        'VariableNames',{'iter' 'x' 'f' 's' 'step' 'nobj'}));
 end
 
 function [ a ] = linesearch(a,x,s,obj)
@@ -231,16 +276,18 @@ function [ a,C,Q ] = stepsize(x,s,a,obj,C,Q,g)
 
     if (ls == 1)
         % Quadratic line search it up in here
-        a = linesearch(a,x,s,obj);
+        [ a ] = linesearch(a,x,s,obj);
     elseif (ls == 2)
         % line search as in book (no iterations)
-        a = exact_linsearch(x,s,a,obj);
+        [ a ] = exact_linsearch(x,s,a,obj);
     elseif (ls == 3)
         % iterative line search, works the best
-        a = iter_linsearch(x,s,obj);
+        [ a ] = iter_linsearch(x,s,obj);
     elseif (ls == 4)
+        % Uses golden ratio to iteratively bracket
         [ a,~ ] = goldensection(x,s,obj);
     elseif (ls == 5)
+        % takes the first good step it finds
         [ a ] = inexact(x,s,g,obj);
     end
 end
@@ -257,6 +304,21 @@ function [ f ] = lookup(x,obj)
         %fprintf('No key...\n');
         f = obj(x);
         LUT(key) = f;
+    end
+end
+
+function [ g ] = lookupg(x,grad)
+    global LUTG keyfmt ngrad_saved;
+    
+    key = char(sprintf(keyfmt,x));
+    if LUTG.isKey(key)
+        %fprintf('Found the key!\n');
+        ngrad_saved = ngrad_saved + 1;
+        g = LUTG(key);
+    else
+        %fprintf('No key...\n');
+        g = grad(x);
+        LUTG(key) = g;
     end
 end
 
@@ -324,6 +386,8 @@ function [ a_good ] = iter_linsearch(x0,s,obj)
     a_good = a(1);
 end
 
+% from "Practical Mathematical Optimization": Chapter 2 Line Search Descent
+% Methods for Unconstrained Minimization
 function [ lambda_star, F_star ] = goldensection(x,s,obj)
     
     r = (sqrt(5) - 1)/2;
@@ -344,7 +408,6 @@ function [ lambda_star, F_star ] = goldensection(x,s,obj)
         F1 = obj(x + lambda1*s);
         F2 = obj(x + lambda2*s);
         ii = ii + 1;
-
 
         % (3)
         if F1 > F2
@@ -368,6 +431,7 @@ function [ lambda_star, F_star ] = goldensection(x,s,obj)
     end
 end
 
+% from http://www-personal.umich.edu/~murty/611/611slides9.pdf
 function [ lambda_bar ] = inexact(x,s,g,obj)
     eps1 = 0.2;
     eps2 = 2;
@@ -425,9 +489,7 @@ function [ a ] = exact_linsearch(x0,s,a0,obj)
     % Get rid of duplicate values if we have any
     [ f,idx ] = unique(f,'stable');
     a = a(idx);
-    
-    %plot(a,f);
-    
+
     % I see people switching between quadratic and cubic fits, but we'll
     % just assume a quadratic for ease
     try
@@ -447,4 +509,13 @@ function [ f ] = cobj(X,Y,Z)
     elseif testflag == 3
         f = X.^2 - 2*X.*Y + 4*Y.^2;
     end
+end
+
+function print_head()
+    fprintf('Iter \t nobj \t f(x) \t\t alpha \t\t 1st-ord optimality\n');
+end
+
+function [ fx ] = print_iter(iter,fx,a,optimality)
+    global nobj;
+    fprintf(' %d \t  %d \t  %f \t  %f \t  %f\n',iter,nobj,fx,a,optimality);
 end

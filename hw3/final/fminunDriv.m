@@ -1,6 +1,7 @@
 function [] = fminunDriv()
 %----------------Example Driver program for fminun------------------
     clear;
+    close all;
 
     global nobj ngrad testflag
     nobj = 0; % counter for objective evaluations
@@ -14,7 +15,7 @@ function [] = fminunDriv()
     % 1 => steepest descent
     % 2 => conjugate gradient
     % 3 => BFGS
-    algoflag = 2;
+    algoflag = 3;
     
     if testflag == 1
         x0 = [10,10,10].';
