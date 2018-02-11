@@ -15,7 +15,7 @@ function [] = fminunDriv()
     % 1 => steepest descent
     % 2 => conjugate gradient
     % 3 => BFGS
-    algoflag = 3;
+    algoflag = 1;
     
     if testflag == 1
         x0 = [10,10,10].';
