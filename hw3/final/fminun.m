@@ -226,19 +226,19 @@ function [xopt,fopt,exitflag] = fminun(obj,grad,x0,stoptol,algoflag)
         exitflag = 0;
     end
     
-    %% Let's look at how everything went
-    figure(1);
-    [X,Y] = meshgrid(linspace(min(h.x(1,:))-1,max(h.x(1,:)+1)), ...
-        linspace(min(h.x(2,:))-1,max(h.x(2,:))+1));
-    if numel(x0) > 2
-        Z = meshgrid(linspace(min(h.x(3,:))-1,max(h.x(3,:))+1));
-    else
-        Z = [];
-    end
-    
-    f = cobj(X,Y,Z);
-    contour(X,Y,f); hold on;
-    plot(h.x(1,:),h.x(2,:),'.-');
+%     %% Let's look at how everything went
+%     figure(1);
+%     [X,Y] = meshgrid(linspace(min(h.x(1,:))-1,max(h.x(1,:)+1)), ...
+%         linspace(min(h.x(2,:))-1,max(h.x(2,:))+1));
+%     if numel(x0) > 2
+%         Z = meshgrid(linspace(min(h.x(3,:))-1,max(h.x(3,:))+1));
+%     else
+%         Z = [];
+%     end
+%     
+%     f = cobj(X,Y,Z);
+%     contour(X,Y,f); hold on;
+%     plot(h.x(1,:),h.x(2,:),'.-');
     
     % Make some tables
     t = table((0:size(h.x,2)-1).',h.x.',h.f.',h.s.',h.a.',h.nobj.', ...
