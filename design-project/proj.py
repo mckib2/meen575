@@ -20,10 +20,10 @@ x = np.sin(a*t + delta)
 y = np.sin(b*t)
 
 # Let's look at it just for fun
-plt.figure()
-plt.scatter(x,y)
-plt.plot(x,y,linewidth=0.5)
-plt.show()
+#plt.figure()
+#plt.scatter(x,y)
+#plt.plot(x,y,linewidth=0.5)
+#plt.show()
 
 Sj = zip(x,y)
 
@@ -33,15 +33,12 @@ vor = Voronoi(Sj,opts)
 voronoi_plot_2d(vor)
 plt.show()
 
-#idx = vor.regions
-#verts = []
-#for reg_idx,reg in enumerate(idx):
-#    verts.append([])
-#    for idx_idx,val in enumerate(reg):
-#        verts[reg_idx].append(vor.vertices[val])
-#    print((verts[reg_idx],verts[reg_idx]))
-#    areas = PolyArea(verts[reg_idx,0],verts[reg_idx,1])
-        
-#print(len(areas))
+# calculate the areas for every voronoi region
+areas = np.zeros((len(vor.regions),1))
+for ii,reg in enumerate(vor.regions):
+    verts = np.zeros((len(reg),2))
+    for jj,vert_idx in enumerate(reg):
+        verts[jj] = vor.vertices[vert_idx]
+    areas[ii] = PolyArea(verts[:,0],verts[:,1])
 
 # We'll also need to load in the Shepp-Loagan phantom
