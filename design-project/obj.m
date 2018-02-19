@@ -3,7 +3,7 @@ function [ f ] = obj(x)
     n = 128; % image is nxn
 
     % find Ns samples along trajectory
-    Ns = 1e4;
+    Ns = 1536; %1e4;
     
     % Grab the image - spatial and frequency domain
     [ im0,IM0 ] = shepp(n);
@@ -12,6 +12,8 @@ function [ f ] = obj(x)
     turns = x(1); % how many spirals
     k = traj(turns,Ns);
 
+%     load('rt_spiral_03.mat');
+    
     % grab complex k-space data, d
     d = sampleIm(k,n,IM0);
     
@@ -85,9 +87,11 @@ end
 function [ k ] = traj(turns,Ns)
     t = linspace(-pi*turns,pi*turns,Ns);
     r = linspace(0,1,Ns);
-    KX = sin(t).*r;
-    KY = cos(t).*r;
-    k = (KX + 1j*KY)/2; % bound k from -.5 to .5
+    for ii = 1:6
+        KX = sin(t + ii/3*pi).*r;
+        KY = cos(t + ii/3*pi).*r;
+        k(:,ii) = (KX + 1j*KY)/2.5; % bound k from -.5 to .5
+    end
 end
 
 function [ d ] = sampleIm(k,n,IM0)
