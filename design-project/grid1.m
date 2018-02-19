@@ -23,14 +23,20 @@ if isempty(o)
 end
 
 % Oversampling adjustment
-n = n*o;
+n = round(n*o);
 
 % cconvert k-space samples to matrix indices
 nx = (n/2+1) + n*real(k);
 ny = (n/2+1) + n*imag(k);
 
 % zero out output array
-m = zeros(n,n);
+try
+    m = zeros(n,n);
+catch
+    fprintf('n is probably too large.');
+    n = 10;
+    m = zeros(n,n);
+end
 
 % Use the kaiser-bessel kernel
 if ~isempty(kw)
@@ -96,7 +102,7 @@ if ~isempty(kw)
     x = (-n/2:n/2-1)/(n/o);
     argsq = sqrt(kw^2*pi^2*x.^2-beta^2);
     dapx = sin(argsq)./argsq;
-    dapx = dapx./dapx(n/2);
+    dapx = dapx./dapx(floor(n/2));
     dap = dapx'*dapx;
     
     m = ifftshift(ifft2(m))./dap;
