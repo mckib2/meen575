@@ -3,29 +3,35 @@ function [ f ] = obj(x)
     n = 128; % image is nxn
 
     % find Ns samples along trajectory
-    Ns = x(1);
+    Ns = 1e4;
     
     % Grab the image - spatial and frequency domain
     [ im0,IM0 ] = shepp(n);
     
     % let's generate a spiral trajectory
-    turns = x(2); % how many spirals
+    turns = x(1); % how many spirals
     k = traj(turns,Ns);
 
     % grab complex k-space data, d
     d = sampleIm(k,n,IM0);
     
     % we need weighting function density compensation
-    w0 = x(3); % this can be a param
+    w0 = x(2); % this can be a param
     w = densityComp(k,w0);
     
     % reconstruction kernel parameters
-    W = x(4); % this can be a param
-    tol = x(5); % this determines kernel oversampling factor
+    W = x(3); % this can be a param
+    tol = x(4); % this determines kernel oversampling factor
+    
+    if tol < 0
+        fprintf('something has gone terribly wrong...\n');
+        tol = eps; %abs(tol);
+    end
+    
     kw = [ W,tol ];
     
     % Perform the reconstruction
-    o = x(6); % oversampling factor
+    o = x(5); % oversampling factor
     recon = grid1(d,k,w,n,o,kw);
     
     % trim down to size
@@ -33,7 +39,7 @@ function [ f ] = obj(x)
     
     try
         if ~isequal(size(recon),[ n n ])
-            recon = recon( (floor(end/2)-n/2):(floor(end/2)+n/2)-1,(floor(end/2)-n/2):(floor(end/2)+n/2)-1);
+            recon = recon( (ceil(end/2)-n/2):(ceil(end/2)+n/2)-1,(ceil(end/2)-n/2):(ceil(end/2)+n/2)-1);
         end
     catch
         fprintf('Index problems...\n');
@@ -50,7 +56,7 @@ function [ f ] = obj(x)
 %     method = 'roberts';
 %     method = 'sobel';
 %     method = 'approxcanny';
-    f = norm(edge(im0.',method) - edge(abs(recon),method))^2 + norm(im0.' - abs(recon))^2;
+    f = norm(edge(im0.',method) - edge(abs(recon),method))^2 + 3*norm(im0.' - abs(recon) )^2;
     
     %imshow(abs(recon),[]);
     if isempty(findobj('type','figure'))

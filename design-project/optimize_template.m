@@ -3,10 +3,10 @@ close all;
 
 
 % ------------Starting point and bounds------------
-% x = [ density comp, kernel width, tolerance, oversampling factor ]
-x0 = [ 1e4  80   1e-5, 10,   1e-8, 1.5 ];
-ub = [ 1e5  Inf, 1,    Inf, 1e-2, Inf ];
-lb = [ 1,   0,   0,    1,   1e-8, 1   ];
+% x = [ turns, density comp, kernel width, tolerance, oversampling factor ]
+x0 = [ 80   1e-5, 2,   1e-3,  1.5 ];
+ub = [ Inf, 1,    25,  1e-2,  3   ];
+lb = [ 1,   0,    1,   1e-6,  1   ];
 
 % ------------Linear constraints------------
 A = [];

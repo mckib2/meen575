@@ -33,9 +33,7 @@ ny = (n/2+1) + n*imag(k);
 try
     m = zeros(n,n);
 catch
-    fprintf('n is probably too large.');
-    n = 10;
-    m = zeros(n,n);
+    fprintf('n might be too large...\n');
 end
 
 % Use the kaiser-bessel kernel
@@ -46,26 +44,34 @@ if ~isempty(kw)
     kosf = 0.91/(o*err);
     beta = pi*sqrt(kw^2*(o-.5)^2-.8);
     hwidth = o*kw/2;
-    
-    ps = (0:kosf*hwidth)/(kosf*hwidth);
+
+    try
+        ps = (0:kosf*hwidth)/(kosf*hwidth);
+    catch
+        fprintf('problems with kosf\n');
+    end
     kernel = besseli(0,beta*sqrt(1-ps.*ps));
-    kernel = kernel/kernel(1);
+    try
+        kernel = kernel/kernel(1);
+    catch
+        fprintf('kernel has no samples?\n');
+    end
     kernel(end) = 0;
-        
+
     for lx = -hwidth:hwidth
         for ly = -hwidth:hwidth
-            
+
             nxt = round(nx + lx);
             nyt = round(ny + ly);
-            
+
             kkx = min(round(kosf*abs(nx-nxt)+1),floor(kosf*hwidth)+1);
             kwx = kernel(kkx);
             kky = min(round(kosf*abs(ny-nyt)+1),floor(kosf*hwidth)+1);
             kwy = kernel(kky);
-            
+
             nxt = max(nxt,1); nxt = min(nxt,n);
             nyt = max(nyt,1); nyt = min(nyt,n);
-            
+
             m = m + sparse(nxt,nyt,d.*kwx'.*kwy'.*w,n,n);
         end
     end
@@ -104,6 +110,6 @@ if ~isempty(kw)
     dapx = sin(argsq)./argsq;
     dapx = dapx./dapx(floor(n/2));
     dap = dapx'*dapx;
-    
+
     m = ifftshift(ifft2(m))./dap;
 end
