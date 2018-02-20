@@ -1,4 +1,6 @@
 function [ f ] = obj(x)
+    tic
+
     % fix n small so it's reasonable computation time
     n = 128; % image is nxn
 
@@ -58,7 +60,9 @@ function [ f ] = obj(x)
 %     method = 'roberts';
 %     method = 'sobel';
 %     method = 'approxcanny';
-    f = norm(edge(im0.',method) - edge(abs(recon),method))^2 + 3*norm(im0.' - abs(recon) )^2;
+    %
+    %f = norm(edge(im0.',method) - edge(abs(recon),method))^2 + 2*norm(im0.' - abs(recon) )^2;
+    f = -(corr2(im0.',abs(recon)) + 1)/2 + norm(edge(im0.',method) - edge(abs(recon),method))^2/300;
     
     %imshow(abs(recon),[]);
     if isempty(findobj('type','figure'))
@@ -77,24 +81,29 @@ function [ f ] = obj(x)
     drawnow;
     
     % disp(x);
+    toc
 end
 
 function [ im0,IM0 ] = shepp(n)
-    im0 = phantom('Modified Shepp-Logan',n);
+    im0 = phantom('Modified Shepp-Logan',2*n);
     IM0 = fftshift(fft2(fftshift(im0)));
 end
 
 function [ k ] = traj(turns,Ns)
+    interleaves = turns;
+    turns = 9; 
+%     interleaves = 6;
     t = linspace(-pi*turns,pi*turns,Ns);
-    r = linspace(0,1,Ns);
-    for ii = 1:6
-        KX = sin(t + ii/3*pi).*r;
-        KY = cos(t + ii/3*pi).*r;
-        k(:,ii) = (KX + 1j*KY)/2.5; % bound k from -.5 to .5
+    r = linspace(0,.5,Ns);
+    for ii = 1:interleaves
+        KX = sin(t + 2*ii/interleaves*pi).*r + ii*eps;
+        KY = cos(t + 2*ii/interleaves*pi).*r + ii*eps;
+        k(:,ii) = (KX + 1j*KY);
     end
 end
 
 function [ d ] = sampleIm(k,n,IM0)
+    n = 2*n;
     kx = (n/2 + 1) + n*real(k);
     ky = (n/2 + 1) + n*imag(k);
     d = interp2(IM0,kx,ky,'spline'); % simulate data collection

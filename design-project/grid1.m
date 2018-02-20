@@ -42,6 +42,7 @@ if ~isempty(kw)
     kw = kw(1);
 
     kosf = 0.91/(o*err);
+    %kosf = .37/(o*err)^2;
     beta = pi*sqrt(kw^2*(o-.5)^2-.8);
     hwidth = o*kw/2;
 
@@ -65,14 +66,17 @@ if ~isempty(kw)
             nyt = round(ny + ly);
 
             kkx = min(round(kosf*abs(nx-nxt)+1),floor(kosf*hwidth)+1);
-            kwx = kernel(kkx);
+            kwx = kernel(kkx).';
             kky = min(round(kosf*abs(ny-nyt)+1),floor(kosf*hwidth)+1);
-            kwy = kernel(kky);
+            kwy = kernel(kky).';
+            
+            %kwx = interp1(ps,kernel,min(abs(nx-nxt)/hwidth,ps(end)),'linear');
+            %kwy = interp1(ps,kernel,min(abs(ny-nyt)/hwidth,ps(end)),'linear');
 
             nxt = max(nxt,1); nxt = min(nxt,n);
             nyt = max(nyt,1); nyt = min(nyt,n);
 
-            m = m + sparse(nxt,nyt,d.*kwx'.*kwy'.*w,n,n);
+            m = m + sparse(nxt,nyt,d.*kwx.*kwy.*w,n,n);
         end
     end
 else

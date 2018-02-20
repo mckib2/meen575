@@ -21,6 +21,8 @@ try
     [V,C] = voronoin(kxy); 
     area = [];
     for j = 1:length(kxy)
+
+        
       x = V(C{j},1); y = V(C{j},2); lxy = length(x);
       try
         A = abs(sum( 0.5*(x([2:lxy 1]) - x(:)).*(y([2:lxy 1]) + y(:))));
