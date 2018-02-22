@@ -34,6 +34,7 @@ beq = [];
 % ------------Call fmincon------------
 tic;
 options = optimoptions(@fmincon, ...
+    'algorithm','sqp', ...
     'display','iter-detailed', ...
     'Diagnostics','on');
 
@@ -50,8 +51,8 @@ if ismember(gflag,[ 2 3 4 ])
     options.SpecifyObjectiveGradient = true;
     fprintf('Setting SpecifyObjectiveGradient to true!\n');
     
-%     options.SpecifyConstraintGradient = true;
-%     fprintf('Setting SpecifyConstraintGradient to true!\n');
+    options.SpecifyConstraintGradient = true;
+    fprintf('Setting SpecifyConstraintGradient to true!\n');
     
     options.CheckGradients = true;
     fprintf('Setting CheckGradients to true!\n');
@@ -59,7 +60,6 @@ end
 
 [xopt,fopt,exitflag,output] = fmincon(@obj,x0,A,b,Aeq,beq,lb,ub,@con,options);  
 eltime = toc;
-fprintf('Took %f s to run\n',eltime);
 
 % do some error checking
 if ~exitflag
@@ -67,32 +67,30 @@ if ~exitflag
 end
 
 % grab the constraints at the optimum
-[~,c,~] = objcon(xopt);
+[ c,~,dc_opt ] = con(xopt);
 
 % show some results in a table
-disp(table(x0.',xopt.',c)); % design variables at start and minimum, and c
+disp(table(x0.',xopt.',c,'VariableNames',{ 'x0','xopt','c' }));
+% disp(table(dc_opt(:,1:5)));
 fprintf('f at xopt: %f\n',fopt); % objective function value at the minumum
 
-% tell us how many times we needed to call the cost function
+% tell us how many times we needed to call the cost function and runtime
 fprintf('nfun: %d\n',nfun);
+fprintf('Took %f s to run\n',eltime);
 
 % ------------Objective and Non-linear Constraints------------
-function [ f,c,ceq,g ] = objcon(x)
+function [ f,c,ceq,g,DC ] = objcon(x)
     global nfun gflag;
 
-    %get data for truss from Data.m file
+    % get data for truss from Data.m file
     Data;
-
-    % insert areas (design variables) into correct matrix
-    for ii = 1:nelem
-        Elem(ii,3) = x(ii);
-    end
+    Elem(:,3) = x; % insert areas (design variables) into correct matrix
 
     % call Truss to get weight and stresses
     [weight,stress] = Truss(ndof,nbc,nelem,E,dens,Node,force,bc,Elem);
 
-    % objective function
-    f = weight; % minimize weight
+    % objective function - minimize weight
+    f = weight;
 
     % inequality constraints, c <= 0
     c = zeros(10,1);
@@ -107,21 +105,25 @@ function [ f,c,ceq,g ] = objcon(x)
         idx = idx + 1;
     end
 
-%     % original constraints
-%     c = zeros(10,1);
-%     for ii = 1:10
-%         c(ii) = abs(stress(ii)) - 25e3;
-%     end
-
     % equality constraints, ceq = 0
     ceq = [];
     nfun = nfun + 1;
     
-    % give back gradients if we asked for them
-    if nargout > 3
+    if nargout == 4
+        % give back gradients if we asked for them
         g = get_g(gflag,x,@obj,[]);
+    elseif nargout == 5
+        % give back gradient of constraints if we asked for them
+%         DC = zeros(numel(x),numel(c));
+        DC = get_g(gflag,x,@dc,[],c);
+%         DC = get_dc(gflag,x,@dc,[]);
+        g = [];
     end
 
+end
+
+function [ c ] = dc(x)
+    [ ~,c ] = objcon(x);
 end
 
 % ------------Separate obj/con (do not change)------------
@@ -134,10 +136,9 @@ function [ f,g ] = obj(x)
 end
 function [ c,ceq,DC,DCeq ] = con(x)
     if nargout > 2
-        [ ~,c,ceq ] = objcon(x);
+        DCeq = [];
+        [ ~,c,ceq,~,DC ] = objcon(x);
     else
         [ ~,c,ceq ] = objcon(x);
-        DCeq = [];
-%         DC = 
     end
 end

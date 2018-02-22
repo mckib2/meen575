@@ -4,43 +4,62 @@
 %     3 => Central Difference
 %     4 => Complex Step
 
-function [ g ] = get_g(gflag,x,obj,h)
+function [ g ] = get_g(gflag,x,fun,h,c)
 
     % make sure we have a step
     if isempty(h)
         h = 1e-4;
     end
+    % check to see if we are doing constraint gradients
+    if ~exist('c','var')
+        c = [];
+        g = zeros(size(x));
+    else
+        g = zeros(numel(x),numel(c));
+    end
 
     % decode gflag
     if ismember(gflag,[ 0 1 ])
+        
         % use MATLAB default, nothing to do
         g = [];
+        
     elseif gflag == 2
         
         % custom forward difference rule
-        g = zeros(size(x));
-        f0 = obj(x);
+        f0 = fun(x);
         for ii = 1:numel(x)
             xp = zeros(size(x)); xp(ii) = h;
-            g(ii) = (obj(x + xp) - f0)/h; 
+            if isempty(c)
+                g(ii) = (fun(x + xp) - f0)/h;
+            else
+                g(ii,:) = (fun(x + xp) - f0)/h;
+            end
         end
         
     elseif gflag == 3
         
         % custom central difference rule
-        g = zeros(size(x));
+
         for ii = 1:numel(x)
             xp = zeros(size(x)); xp(ii) = h;
-            g(ii) = (obj(x + xp) - obj(x - xp))/(2*h);
+            if isempty(c)
+                g(ii) = (fun(x + xp) - fun(x - xp))/(2*h);
+            else
+                g(ii,:) = (fun(x + xp) - fun(x - xp))/(2*h);
+            end
         end
     
     elseif gflag == 4
     
         % custom complex step rule
-        g = zeros(size(x));
         for ii = 1:numel(x)
             xp = zeros(size(x)); xp(ii) = 1j*h;
-            g(ii) = imag(obj(x + xp))/h;
+            if isempty(c)
+                g(ii) = imag(fun(x + xp))/h;
+            else
+                g(ii,:) = imag(fun(x + xp))/h;
+            end
         end
         
     end
