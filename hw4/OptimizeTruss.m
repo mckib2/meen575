@@ -8,14 +8,20 @@ close all;
 
 % ------------Starting point and bounds------------
 %design variables
-% x0 = [ 5 5 5 5 5 5 5 5 5 5 ]; 
 x0 = ones(1,10)*5; % starting point (all areas = 5 in^2)
-% lb = [ 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 ]; %lower bound
 lb = ones(1,10)*.1; % lower bound
-% ub = [ 20 20 20 20 20 20 20 20 20 20 ]; %upper bound
 ub = ones(1,10)*20; % upper bound
 
-% Keep track of how many function calls we make
+% Tell me what kind of gradients you want:
+%     0 => MATLAB's forward difference
+%     1 => MATLAB's central difference
+%     2 => Forward Difference
+%     3 => Central Difference
+%     4 => Complex Step
+global gflag;
+gflag = 4;
+
+% Keep track of how many function calls we make.
 global nfun;
 nfun = 0;
 
@@ -30,6 +36,26 @@ tic;
 options = optimoptions(@fmincon, ...
     'display','iter-detailed', ...
     'Diagnostics','on');
+
+% Tell the optimizer how to get gradients based on gflag
+% gflag == 0 => default MATLAB forward difference rule, no need to change
+if ismember(gflag,[ 1 2 3 4 ])
+    % MATLAB's Central Difference Rule
+    % All other custom gradients also need this
+    options.FiniteDifferenceType = 'central';
+    fprintf('Setting FiniteDifferenceType to Central!\n');
+end
+if ismember(gflag,[ 2 3 4 ])
+    % Custom gradient option
+    options.SpecifyObjectiveGradient = true;
+    fprintf('Setting SpecifyObjectiveGradient to true!\n');
+    
+%     options.SpecifyConstraintGradient = true;
+%     fprintf('Setting SpecifyConstraintGradient to true!\n');
+    
+    options.CheckGradients = true;
+    fprintf('Setting CheckGradients to true!\n');
+end
 
 [xopt,fopt,exitflag,output] = fmincon(@obj,x0,A,b,Aeq,beq,lb,ub,@con,options);  
 eltime = toc;
@@ -51,8 +77,8 @@ fprintf('f at xopt: %f\n',fopt); % objective function value at the minumum
 fprintf('nfun: %d\n',nfun);
 
 % ------------Objective and Non-linear Constraints------------
-function [ f,c,ceq ] = objcon(x)
-    global nfun;
+function [ f,c,ceq,g ] = objcon(x)
+    global nfun gflag;
 
     %get data for truss from Data.m file
     Data;
@@ -90,13 +116,28 @@ function [ f,c,ceq ] = objcon(x)
     % equality constraints, ceq = 0
     ceq = [];
     nfun = nfun + 1;
+    
+    % give back gradients if we asked for them
+    if nargout > 3
+        g = get_g(gflag,x,@obj,[]);
+    end
 
 end
 
 % ------------Separate obj/con (do not change)------------
-function [ f ] = obj(x) 
-    [ f,~,~ ] = objcon(x);
+function [ f,g ] = obj(x)
+    if nargout > 1
+        [ f,~,~,g ] = objcon(x);
+    else
+        [ f ] = objcon(x);
+    end
 end
-function [ c,ceq ] = con(x) 
-    [ ~,c,ceq ] = objcon(x);
+function [ c,ceq,DC,DCeq ] = con(x)
+    if nargout > 2
+        [ ~,c,ceq ] = objcon(x);
+    else
+        [ ~,c,ceq ] = objcon(x);
+        DCeq = [];
+%         DC = 
+    end
 end
