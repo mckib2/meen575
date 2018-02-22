@@ -85,7 +85,7 @@ function [ f ] = obj(x)
 end
 
 function [ im0,IM0 ] = shepp(n)
-    im0 = phantom('Modified Shepp-Logan',2*n);
+    im0 = phantom('Modified Shepp-Logan',n);
     IM0 = fftshift(fft2(fftshift(im0)));
 end
 
@@ -103,7 +103,6 @@ function [ k ] = traj(turns,Ns)
 end
 
 function [ d ] = sampleIm(k,n,IM0)
-    n = 2*n;
     kx = (n/2 + 1) + n*real(k);
     ky = (n/2 + 1) + n*imag(k);
     d = interp2(IM0,kx,ky,'spline'); % simulate data collection

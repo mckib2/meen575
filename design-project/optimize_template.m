@@ -4,7 +4,8 @@ close all;
 
 % ------------Starting point and bounds------------
 % x = [ turns, density comp, kernel width, tolerance, oversampling factor ]
-x0 = [ 9   1e-5,  2,   1e-3,  2.5 ];
+x0 = [ 9    1e-5, 2,   1e-3,  2.5 ];
+% x0 = [ 8, 1e-5, 2,   1e-3,  2.5 ];
 ub = [ Inf, 1,    25,  1e-2,  3   ];
 lb = [ 1,   0,    1,   1e-6,  1   ];
 
