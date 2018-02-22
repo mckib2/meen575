@@ -19,7 +19,7 @@ ub = ones(1,10)*20; % upper bound
 %     3 => Central Difference
 %     4 => Complex Step
 global gflag;
-gflag = 3;
+gflag = 4;
 
 % Keep track of how many function calls we make.
 global nfun;
@@ -61,7 +61,7 @@ if ismember(gflag,[ 3 4 ])
     fprintf('Setting CheckGradients to true!\n');
 end
 
-[xopt,fopt,exitflag,output] = fmincon(@obj,x0,A,b,Aeq,beq,lb,ub,@con,options);  
+[xopt,fopt,exitflag,output,~,g] = fmincon(@obj,x0,A,b,Aeq,beq,lb,ub,@con,options);  
 eltime = toc;
 
 % do some error checking
@@ -73,7 +73,7 @@ end
 [ c,~,dc_opt ] = con(xopt);
 
 % show some results in a table
-disp(table(x0.',xopt.',c,'VariableNames',{ 'x0','xopt','c' }));
+disp(table(x0.',xopt.',g.',c,'VariableNames',{ 'x0','xopt','grad','c' }));
 % disp(table(dc_opt(:,1:5)));
 fprintf('f at xopt: %f\n',fopt); % objective function value at the minumum
 
