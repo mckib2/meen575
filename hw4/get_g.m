@@ -12,10 +12,14 @@ function [ g ] = get_g(gflag,x,fun,h,c)
     end
     % check to see if we are doing constraint gradients
     if ~exist('c','var')
+        % We are doing objective gradients
         c = [];
         g = zeros(size(x));
+        xp_proto = g;
     else
-        g = zeros(numel(x),numel(c));
+        % We are doing constraint gradients
+        g = zeros(size(c.'));
+        xp_proto = g;
     end
 
     % decode gflag
@@ -29,7 +33,7 @@ function [ g ] = get_g(gflag,x,fun,h,c)
         % custom forward difference rule
         f0 = fun(x);
         for ii = 1:numel(x)
-            xp = zeros(size(x)); xp(ii) = h;
+            xp = xp_proto; xp(ii) = h;
             if isempty(c)
                 g(ii) = (fun(x + xp) - f0)/h;
             else
@@ -42,7 +46,7 @@ function [ g ] = get_g(gflag,x,fun,h,c)
         % custom central difference rule
 
         for ii = 1:numel(x)
-            xp = zeros(size(x)); xp(ii) = h;
+            xp = xp_proto; xp(ii) = h;
             if isempty(c)
                 g(ii) = (fun(x + xp) - fun(x - xp))/(2*h);
             else
@@ -54,7 +58,7 @@ function [ g ] = get_g(gflag,x,fun,h,c)
     
         % custom complex step rule
         for ii = 1:numel(x)
-            xp = zeros(size(x)); xp(ii) = 1j*h;
+            xp = xp_proto; xp(ii) = 1j*h;
             if isempty(c)
                 g(ii) = imag(fun(x + xp))/h;
             else

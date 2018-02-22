@@ -19,7 +19,7 @@ ub = ones(1,10)*20; % upper bound
 %     3 => Central Difference
 %     4 => Complex Step
 global gflag;
-gflag = 4;
+gflag = 3;
 
 % Keep track of how many function calls we make.
 global nfun;
@@ -41,8 +41,8 @@ options = optimoptions(@fmincon, ...
 % Tell the optimizer how to get gradients based on gflag
 % gflag == 0 => default MATLAB forward difference rule, no need to change
 if ismember(gflag,[ 1 2 3 4 ])
-    % MATLAB's Central Difference Rule
-    % All other custom gradients also need this
+    % Use MATLAB's Central Difference Rule. All other custom gradients
+    % will use this.
     options.FiniteDifferenceType = 'central';
     fprintf('Setting FiniteDifferenceType to Central!\n');
 end
@@ -53,7 +53,10 @@ if ismember(gflag,[ 2 3 4 ])
     
     options.SpecifyConstraintGradient = true;
     fprintf('Setting SpecifyConstraintGradient to true!\n');
-    
+end
+if ismember(gflag,[ 3 4 ])
+    % CheckGradients on all custom rules except forward difference which is
+    % not accurate enough to run with this option.
     options.CheckGradients = true;
     fprintf('Setting CheckGradients to true!\n');
 end
@@ -110,13 +113,11 @@ function [ f,c,ceq,g,DC ] = objcon(x)
     nfun = nfun + 1;
     
     if nargout == 4
-        % give back gradients if we asked for them
+        % give back gradient of objective if we asked for it
         g = get_g(gflag,x,@obj,[]);
     elseif nargout == 5
         % give back gradient of constraints if we asked for them
-%         DC = zeros(numel(x),numel(c));
         DC = get_g(gflag,x,@dc,[],c);
-%         DC = get_dc(gflag,x,@dc,[]);
         g = [];
     end
 
