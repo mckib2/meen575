@@ -35,13 +35,20 @@ options = optimoptions(@fmincon, ...
 eltime = toc;
 fprintf('Took %f s to run\n',eltime);
 
-% disp(table(xopt,
+% do some error checking
+if ~exitflag
+    fprintf('Exit with error code %d!\n',exitflag);
+end
 
-xopt    %design variables at the minimum
-fopt    %objective function value at the minumum
-[f,c,ceq] = objcon(xopt);
-c
-nfun
+% grab the constraints at the optimum
+[~,c,~] = objcon(xopt);
+
+% show some results in a table
+disp(table(x0.',xopt.',c)); % design variables at start and minimum, and c
+fprintf('f at xopt: %f\n',fopt); % objective function value at the minumum
+
+% tell us how many times we needed to call the cost function
+fprintf('nfun: %d\n',nfun);
 
 % ------------Objective and Non-linear Constraints------------
 function [ f,c,ceq ] = objcon(x)
@@ -62,14 +69,23 @@ function [ f,c,ceq ] = objcon(x)
     f = weight; % minimize weight
 
     % inequality constraints, c <= 0
-    c = zeros(20,1);
+    c = zeros(10,1);
     idx = 1;
     for ii = 1:10
-        % check stress both pos and neg
-        c(idx) = stress(ii) - 25e3;
-        c(idx+1) = -25e3 - stress(ii);
-        idx = idx + 2;
+        % check stress both pos and neg - could be complex
+        if stress(ii) >= 0
+            c(idx) = stress(ii) - 25e3;
+        else
+            c(idx) = -25e3 - stress(ii);
+        end
+        idx = idx + 1;
     end
+
+%     % original constraints
+%     c = zeros(10,1);
+%     for ii = 1:10
+%         c(ii) = abs(stress(ii)) - 25e3;
+%     end
 
     % equality constraints, ceq = 0
     ceq = [];
