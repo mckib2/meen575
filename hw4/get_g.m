@@ -9,6 +9,8 @@ function [ g ] = get_g(gflag,x,fun,h,c)
     % make sure we have a step
     if isempty(h)
         h = 1e-4;
+%     else
+%         fprintf('Using h = %g\n',h);
     end
     % check to see if we are doing constraint gradients
     if ~exist('c','var')
