@@ -133,7 +133,6 @@ catch
 end
 
 
-
 % ------------Objective and Non-linear Constraints------------
 function [ f,c,ceq,g,DC ] = objcon(x)
     global nfun gflag hg hc;

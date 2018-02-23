@@ -67,7 +67,5 @@ function [ g ] = get_g(gflag,x,fun,h,c)
                 g(ii,:) = imag(fun(x + xp))/h;
             end
         end
-        
     end
-
 end
