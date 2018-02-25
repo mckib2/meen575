@@ -32,10 +32,12 @@ function [xopt, fopt, exitflag, output] = optimize_twobartruss()
         B = 60;    %separation distance (in)
         
         %analysis functions
-        weight = rho*2*pi*d*t*sqrt((B/2)^2+H^2); %lbs
-        stress = (P*sqrt((B/2)^2+H^2))/(2*t*pi*d*H); %ksi
-        bstress = (pi^2*E*(d^2+t^2))/(8*((B/2)^2+H^2)); %ksi
-        deflection = P*((B/2)^2+H^2)^(3/2)/(2*t*pi*d*H^2*E); %in
+        [ weight,stress,bstress,deflection ] = get_vals(rho,d,t,B,H,E,P);
+        fcheck = [ weight.val,stress.val,bstress.val,deflection.val ];
+%         weight = rho*2*pi*d*t*sqrt((B/2)^2+H^2); %lbs
+%         stress = (P*sqrt((B/2)^2+H^2))/(2*t*pi*d*H); %ksi
+%         bstress = (pi^2*E*(d^2+t^2))/(8*((B/2)^2+H^2)); %ksi
+%         deflection = P*((B/2)^2+H^2)^(3/2)/(2*t*pi*d*H^2*E); %in
 
         %objective function
         f = weight; %minimize weight
@@ -49,11 +51,31 @@ function [xopt, fopt, exitflag, output] = optimize_twobartruss()
         %equality constraints (ceq=0)
         ceq = [];
         
-        F = [ weight.val stress.val bstress.val deflection.val ];
+        F = [ weight.val stress.val bstress.val deflection.val ].';
         J = [ weight.der; stress.der; bstress.der; deflection.der ];
         
-        disp(table(F));
-        disp(table(J));
+        % do a simple forward difference rule to verify what we're getting
+        % makes sense
+        Jcheck = zeros(size(J));
+        h = 1e-4;
+        for ii = 1:4
+            for jj = 1:numel(x0)
+                xp = zeros(size(x0)); xp(jj) = h;
+                [ wt,strs,bstrs,defl ] = get_vals(rho,x0(2) + xp(2),t,B,x0(1) + xp(1),E,P);
+                dict = [ wt,strs,bstrs,defl ];
+                forward = dict(ii);
+                Jcheck(ii,jj) = (forward - fcheck(ii))/h;
+            end
+        end
+        
+        disp(table(F,J,Jcheck,'RowNames',{ 'weight','stress','bstress','deflection' }));
+    end
+
+    function [ weight,stress,bstress,deflection ] = get_vals(rho,d,t,B,H,E,P)
+        weight = rho*2*pi*d*t*sqrt((B/2)^2+H^2); %lbs
+        stress = (P*sqrt((B/2)^2+H^2))/(2*t*pi*d*H); %ksi
+        bstress = (pi^2*E*(d^2+t^2))/(8*((B/2)^2+H^2)); %ksi
+        deflection = P*((B/2)^2+H^2)^(3/2)/(2*t*pi*d*H^2*E); %in
     end
 
 
@@ -63,8 +85,7 @@ function [xopt, fopt, exitflag, output] = optimize_twobartruss()
 %     xopt %design variables at the minimum
 %     fopt %objective function value at the minumum  fopt = f(xopt)
 
-objcon(x0);
-
+    objcon(x0);
 
     % ------------Separate obj/con (do not change)------------
     function [f] = obj(x) 

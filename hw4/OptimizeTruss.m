@@ -33,8 +33,8 @@ beq = [];
 % ------------Call fmincon------------
 
 options = optimoptions(@fmincon, ...
-    'algorithm','interior-point', ...
-    'display','iter-detailed', ...
+    'algorithm','sqp', ...
+    'display','iter', ...
     'Diagnostics','on');
 
 % Tell the optimizer how to get gradients based on gflag
@@ -98,38 +98,43 @@ if gflag == 4
 end
 
 options.Display = 'none';
-try
+
+N = 100; % run the thing N times
+times = zeros(N,1); % store how long it takes each time
+
+for ii = 1:N
     nfun = 0;
+    if ii == N
+        options.Display = 'iter';
+    end
     tic;
     [ xopt,fopt,exitflag,output,~,g ] = fmincon(@obj,x0,A,b,Aeq,beq,lb,ub,@con,options);
-    eltime = toc;
-    
-    % do some error checking
-    if ~exitflag
-        fprintf('Exit with error code %d!\n',exitflag);
-    end
+    times(ii) = toc;
+end
 
-    % grab the constraints at the optimum
-    [ c,~,dc_opt ] = con(xopt);
+% do some error checking
+if ~exitflag
+    fprintf('Exit with error code %d!\n',exitflag);
+end
 
-    % show some results in a table
-    disp(table(x0(:),xopt(:),g(:),c(:),'VariableNames',{ 'x0','xopt','grad','c' }));
-    % disp(table(dc_opt(:,1:5)));
-    fprintf('f at xopt: %f\n',fopt); % objective function value at the minumum
+% grab the constraints at the optimum
+[ c,~,dc_opt ] = con(xopt);
 
-    % tell us how many times we needed to call the cost function and runtime
-    fprintf('nfun: %d\n',nfun);
-    fprintf('Took %f s to run\n',eltime);
+% show some results in a table
+disp(table(x0(:),xopt(:),g(:),c(:),'VariableNames',{ 'x0','xopt','grad','c' }));
+% disp(table(dc_opt(:,1:5)));
+fprintf('f at xopt: %f\n',fopt); % objective function value at the minumum
 
-    if exist('gsamp','var')
-        fprintf('Maximum relative difference between supplied\n');
-        fprintf('and complex step derivates = %g\n',max(abs(gsamp - gcp)));
-    else
-        fprintf('Maximum relative difference between supplied\n');
-        fprintf('and complex step derivates = %g\n',max(abs(g.' - gcp)));
-    end
-catch
-    fprintf('FAILED! Seems as though our gradient checks have failed.\n');
+% tell us how many times we needed to call the cost function and runtime
+fprintf('nfun: %d\n',nfun);
+fprintf('Took average of %f s to run\n',mean(times));
+
+if exist('gsamp','var')
+    fprintf('Maximum relative difference between supplied\n');
+    fprintf('and complex step derivates = %g\n',max(abs(gsamp - gcp)));
+else
+    fprintf('Maximum relative difference between supplied\n');
+    fprintf('and complex step derivates = %g\n',max(abs(g - gcp)));
 end
 
 
@@ -160,6 +165,11 @@ function [ f,c,ceq,g,DC ] = objcon(x)
         idx = idx + 1;
     end
 
+    % scaling - seems to really make a difference because the stress values
+    % are very large - ~25000.
+    c = c/1000;
+    
+    
     % equality constraints, ceq = 0
     ceq = [];
     nfun = nfun + 1;
