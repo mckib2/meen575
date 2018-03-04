@@ -4,7 +4,6 @@ function [ xopt,fopt,h,nobj ] = anneal(obj,x0,Ps,Pf,N,sigma)
     Ts = -1/log(Ps);
     Tf = -1/log(Pf);
     F = (Tf/Ts)^(1/(N - 1));
-    %sigma = .3;
     rng('default');
     
     % Set initial values
@@ -23,8 +22,8 @@ function [ xopt,fopt,h,nobj ] = anneal(obj,x0,Ps,Pf,N,sigma)
     while T > Tf
         % For each cycle
         for ii = 1:N
-            % Randomly perturb the design to different discrete values close
-            % to the current design
+            % Randomly perturb the design to different discrete values
+            % close to the current design
             x11 = x1 + (2*rand(1) - 1)*sigma;
             x22 = x2 + (2*rand(1) - 1)*sigma;
 
@@ -42,11 +41,11 @@ function [ xopt,fopt,h,nobj ] = anneal(obj,x0,Ps,Pf,N,sigma)
                 x2 = x22;
                 dEavg = (dEavg + dE)/2; % add to the running avg
             else
-                % If the new design is worse, generate a random number between
-                % 0 and 1 using a uniform distribution. Compare this number to
-                % the Boltzmann probability. If the random number is lower
-                % than the Boltzmann probability, accept the worse design as
-                % the current design
+                % If the new design is worse, generate a random number
+                % between 0 and 1 using a uniform distribution. Compare
+                % this number to the Boltzmann probability. If the random
+                % number is lower than the Boltzmann probability, accept
+                % the worse design as the current design
 
                 rnum = rand(1);
                 Pb = exp(-dE/(dEavg*T));
