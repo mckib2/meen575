@@ -31,11 +31,9 @@ for ii = 1:numx0
     x0 = x0s(ii,:);
     [ xopts(ii,:),fopts(ii),hs{ii},nobjs(ii) ] = anneal(f,x0,Ps,Pf,N,sigma);
 end
+dist_from_opt = sqrt(sum((xopts - [ 0 0 ]).^2,2));
 
-off = sqrt(sum((xopts - [ 0 0 ]).^2,2));
-off(abs(off) < 1) = 0;
-
-disp(table(x0s,xopts,fopts,nobjs,off));
+disp(table(x0s,xopts,fopts,nobjs,dist_from_opt));
 
 %% Some Plots
 % Get bounds of contour plot
