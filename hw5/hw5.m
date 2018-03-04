@@ -7,18 +7,20 @@ clear;
 close all;
 
 % Objective
-f = @(x1,x2) 2 + .2*x1^2 + .2*x2^2 - cos(pi*x1) - cos(pi*x2);
+f = @(x1,x2) 2 + .2*x1.^2 + .2*x2.^2 - cos(pi*x1) - cos(pi*x2);
 
 % Set the seed for reproducability
 rng('default');
 
 %% Params
 a = -5; b = 5;
-numx0 = 3;
+numx0 = 20;
 x0s = (b - a)*rand(numx0,2) + a;
-Ps = .9;
+Ps = .3;
 Pf = eps;
-N = 250;
+N = 11;
+sigma = 2;
+show_paths = [ 1 2 4 ]; % show paths for these x0s
 
 %% Simulate the Annealing...
 xopts = zeros(numx0,2);
@@ -27,19 +29,43 @@ hs = cell(size(fopts));
 nobjs = fopts;
 for ii = 1:numx0
     x0 = x0s(ii,:);
-    [ xopts(ii,:),fopts(ii),hs{ii},nobjs(ii) ] = anneal(f,x0,Ps,Pf,N);
+    [ xopts(ii,:),fopts(ii),hs{ii},nobjs(ii) ] = anneal(f,x0,Ps,Pf,N,sigma);
 end
 
-disp(table(xopts,fopts,nobjs));
+off = sqrt(sum((xopts - [ 0 0 ]).^2,2));
+off(abs(off) < 1) = 0;
+
+disp(table(x0s,xopts,fopts,nobjs,off));
 
 %% Some Plots
+% Get bounds of contour plot
+x1mx = b; x1mn = a; x2mx = b; x2mn = a;
+for ii = 1:numel(hs)
+    h = hs{ii};
+    if min(h.x(:,1)) < x1mn
+        x1mn = min(h.x(:,1));
+    end
+    if max(h.x(:,1)) > x1mx
+        x1mx = max(h.x(:,1));
+    end
+    
+    if min(h.x(:,2)) < x2mn
+        x2mn = min(h.x(:,2));
+    end
+    if max(h.x(:,2)) > x2mx
+        x2mx = max(h.x(:,2));
+    end
+end
+
 figure(1);
-x = linspace(a,b,1000);
-[ X1,X2 ] = meshgrid(x,x);
-contour(X1,X2,f(X1,X2));
+x1 = linspace(x1mn,x1mx,1000);
+x2 = linspace(x2mn,x2mx,1000);
+[ X1,X2 ] = meshgrid(x1,x2);
+[ c,h ] = contour(X1,X2,f(X1,X2),20,'k','DisplayName','f(x)');
 hold on;
 
-for ii = 1:numx0
+kk = 1; % plot every kkth point
+for ii = show_paths
     h = hs{ii};
     xopt = xopts(ii,:);
     fopt = fopts(ii);
@@ -47,7 +73,13 @@ for ii = 1:numx0
     hx = h.x;
     hf = h.f;
 
-    plot(hx(:,1),hx(:,2),'.-');
+    % Plot the paths for each starting point, x0ii
+    plot(hx(1:kk:end,1),hx(1:kk:end,2),'.-','DisplayName',sprintf('x_{0%d}',ii));
 end
 
-legend('f(x)','x0_1','x0_2','x0_3');
+plot(xopts(show_paths,1),xopts(show_paths,2),'kp','DisplayName','Optimums');
+plot(0,0,'rp','DisplayName','x_{opt}');
+legend(gca,'show')
+title('f(x), paths for various starting points');
+xlabel('x_1');
+ylabel('x_2');

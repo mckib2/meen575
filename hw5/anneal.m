@@ -1,10 +1,10 @@
-function [ xopt,fopt,h,nobj ] = anneal(obj,x0,Ps,Pf,N)
+function [ xopt,fopt,h,nobj ] = anneal(obj,x0,Ps,Pf,N,sigma)
 
     % Loop params
     Ts = -1/log(Ps);
     Tf = -1/log(Pf);
     F = (Tf/Ts)^(1/(N - 1));
-    sigma = .1;
+    %sigma = .3;
     rng('default');
     
     % Set initial values
@@ -19,6 +19,7 @@ function [ xopt,fopt,h,nobj ] = anneal(obj,x0,Ps,Pf,N)
     h.x(1,:) = [ x1 x2 ];
     h.f(1) = f;
     
+    idx = 2;
     while T > Tf
         % For each cycle
         for ii = 1:N
@@ -32,7 +33,7 @@ function [ xopt,fopt,h,nobj ] = anneal(obj,x0,Ps,Pf,N)
             nobj = nobj + 1;
             
             % Grab some values for Pb
-            dE = ff - f;
+            dE = abs(ff - f); % Should this be an absolute value?
 
             % If the new design is better, accept it as the current design
             if ff < f
@@ -60,8 +61,9 @@ function [ xopt,fopt,h,nobj ] = anneal(obj,x0,Ps,Pf,N)
             end
 
             % Update the history
-            h.x(ii+1,:) = [ x1 x2 ];
-            h.f(ii+1) = f;
+            h.x(idx,:) = [ x1 x2 ];
+            h.f(idx) = f;
+            idx = idx + 1;
         end
         
         % Decrease Temperature
