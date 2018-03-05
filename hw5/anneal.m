@@ -38,7 +38,8 @@ function [ xopt,fopt,h,nobj ] = anneal(obj,x0,Ps,Pf,N,n,sigma)
                 f = ff; % Accept the design!
                 x1 = x11;
                 x2 = x22;
-                dEavg = (dEavg*(ii-1) + dE)/ii; % add to the running avg
+                %dEavg = (dEavg*(ii-1) + dE)/ii; % add to the running avg
+                dEavg = [ dEavg dE ];
             else
                 % If the new design is worse, generate a random number
                 % between 0 and 1 using a uniform distribution. Compare
@@ -47,14 +48,15 @@ function [ xopt,fopt,h,nobj ] = anneal(obj,x0,Ps,Pf,N,n,sigma)
                 % the worse design as the current design
 
                 rnum = rand(1);
-                Pb = exp(-dE/(dEavg*T));
+                Pb = exp(-dE/(mean(dEavg)*T));
 
                 if rnum < Pb
                     % Accept!
                     x1 = x11;
                     x2 = x22;
                     f = ff;
-                    dEavg = (dEavg*(ii-1) + dE)/ii;
+                    %dEavg = (dEavg*(ii-1) + dE)/ii;
+                    dEavg = [ dEavg dE ];
                 end
             end
 
