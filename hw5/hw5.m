@@ -3,10 +3,6 @@
 % MEEn 575
 % 2018-03-03
 
-%% TODO
-% Choose best f
-% scaling sigma
-
 clear;
 close all;
 
@@ -25,7 +21,7 @@ Pf = eps;
 N = 40;
 n = 3;
 sigma = 2;
-show_paths = [ 1 2 4 ]; % show paths for these x0s
+show_paths = 1:10; % show paths for these x0s
 
 %% Simulate the Annealing...
 xopts = zeros(numx0,2);
@@ -35,6 +31,14 @@ nobjs = fopts;
 for ii = 1:numx0
     x0 = x0s(ii,:);
     [ xopts(ii,:),fopts(ii),hs{ii},nobjs(ii) ] = anneal(f,x0,Ps,Pf,N,n,sigma);
+    
+    % Make sure to choose the best one we remember
+    [ val,idx ] = min(hs{ii}.f);
+    if val < fopts(ii)
+        %fprintf('I chose the wrong one! %f -> %f\n',fopts(ii),val);
+        xopts(ii,:) = hs{ii}.x(idx,:);
+        fopts(ii) = val;
+    end
 end
 dist_from_opt = sqrt(sum((xopts - [ 0 0 ]).^2,2));
 
