@@ -1,4 +1,4 @@
-function [ xopt,fopt,h,nobj ] = anneal(obj,x0,Ps,Pf,N,sigma)
+function [ xopt,fopt,h,nobj ] = anneal(obj,x0,Ps,Pf,N,n,sigma)
 
     % Loop params
     Ts = -1/log(Ps);
@@ -20,8 +20,7 @@ function [ xopt,fopt,h,nobj ] = anneal(obj,x0,Ps,Pf,N,sigma)
     
     idx = 2;
     while T > Tf
-        % For each cycle
-        for ii = 1:N
+        for ii = 1:n
             % Randomly perturb the design to different discrete values
             % close to the current design
             x11 = x1 + (2*rand(1) - 1)*sigma;
@@ -32,7 +31,7 @@ function [ xopt,fopt,h,nobj ] = anneal(obj,x0,Ps,Pf,N,sigma)
             nobj = nobj + 1;
             
             % Grab some values for Pb
-            dE = abs(ff - f); % Should this be an absolute value?
+            dE = abs(ff - f);
 
             % If the new design is better, accept it as the current design
             if ff < f

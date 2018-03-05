@@ -3,6 +3,10 @@
 % MEEn 575
 % 2018-03-03
 
+%% TODO
+% Choose best f
+% scaling sigma
+
 clear;
 close all;
 
@@ -18,7 +22,8 @@ numx0 = 20;
 x0s = (b - a)*rand(numx0,2) + a;
 Ps = .3;
 Pf = eps;
-N = 11;
+N = 40;
+n = 3;
 sigma = 2;
 show_paths = [ 1 2 4 ]; % show paths for these x0s
 
@@ -29,7 +34,7 @@ hs = cell(size(fopts));
 nobjs = fopts;
 for ii = 1:numx0
     x0 = x0s(ii,:);
-    [ xopts(ii,:),fopts(ii),hs{ii},nobjs(ii) ] = anneal(f,x0,Ps,Pf,N,sigma);
+    [ xopts(ii,:),fopts(ii),hs{ii},nobjs(ii) ] = anneal(f,x0,Ps,Pf,N,n,sigma);
 end
 dist_from_opt = sqrt(sum((xopts - [ 0 0 ]).^2,2));
 
@@ -81,3 +86,16 @@ legend(gca,'show')
 title('f(x), paths for various starting points');
 xlabel('x_1');
 ylabel('x_2');
+
+%% Cooling Curve
+figure(2); hold on;
+for ii = show_paths
+    h = hs{ii};
+    hf = h.f;
+    plot(hf(1:n:end),'DisplayName',sprintf('x_{0%d}',ii));
+end
+
+legend(gca,'show');
+title('Cooling curves for selected x_0');
+xlabel('N');
+ylabel('f(x)');
