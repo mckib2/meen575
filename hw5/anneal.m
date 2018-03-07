@@ -17,6 +17,7 @@ function [ xopt,fopt,h,nobj ] = anneal(obj,x0,Ps,Pf,N,n,sigma)
     % Update the history
     h.x(1,:) = [ x1 x2 ];
     h.f(1) = f;
+    h.T(1) = T;
     
     idx = 2;
     while T > Tf
@@ -38,7 +39,6 @@ function [ xopt,fopt,h,nobj ] = anneal(obj,x0,Ps,Pf,N,n,sigma)
                 f = ff; % Accept the design!
                 x1 = x11;
                 x2 = x22;
-                %dEavg = (dEavg*(ii-1) + dE)/ii; % add to the running avg
                 dEavg = [ dEavg dE ];
             else
                 % If the new design is worse, generate a random number
@@ -55,7 +55,6 @@ function [ xopt,fopt,h,nobj ] = anneal(obj,x0,Ps,Pf,N,n,sigma)
                     x1 = x11;
                     x2 = x22;
                     f = ff;
-                    %dEavg = (dEavg*(ii-1) + dE)/ii;
                     dEavg = [ dEavg dE ];
                 end
             end
@@ -63,6 +62,7 @@ function [ xopt,fopt,h,nobj ] = anneal(obj,x0,Ps,Pf,N,n,sigma)
             % Update the history
             h.x(idx,:) = [ x1 x2 ];
             h.f(idx) = f;
+            h.T(idx) = T;
             idx = idx + 1;
         end
         

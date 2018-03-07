@@ -103,3 +103,14 @@ legend(gca,'show');
 title('Cooling curves for selected x_0');
 xlabel('N');
 ylabel('f(x)');
+
+%% Misc Plot
+figure(3); hold on;
+% The same for all curves
+h = hs{1};
+hT = h.T;
+plot(hT);
+
+title('f eval vs T');
+xlabel('Function Evaluations');
+ylabel('T');
