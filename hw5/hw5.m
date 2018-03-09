@@ -68,7 +68,7 @@ figure(1);
 x1 = linspace(x1mn,x1mx,1000);
 x2 = linspace(x2mn,x2mx,1000);
 [ X1,X2 ] = meshgrid(x1,x2);
-[ c,h ] = contour(X1,X2,f(X1,X2),20,'k','DisplayName','f(x)');
+contour(X1,X2,f(X1,X2),20,'k','DisplayName','f(x)');
 hold on;
 
 kk = 1; % plot every kkth point
@@ -104,7 +104,7 @@ title('Cooling curves for selected x_0');
 xlabel('N');
 ylabel('f(x)');
 
-%% Misc Plot
+%% f vs T
 figure(3); hold on;
 % The same for all curves
 h = hs{1};
@@ -114,3 +114,16 @@ plot(hT);
 title('f eval vs T');
 xlabel('Function Evaluations');
 ylabel('T');
+
+%% Sshow finals points land near global optimum
+figure(4);
+x1 = linspace(a,b,1000); x2 = zeros(size(x2));
+plot(x1,f(x1,x2),'-k','DisplayName','f(x_1,0)'); hold on;
+for ii = show_paths
+    plot(xopts(ii,1),fopts(ii),'x','DisplayName',sprintf('x_{opt%d}',ii));
+end
+
+legend(gca,'show');
+title('Cross Section showing final solutions');
+xlabel('x_1');
+ylabel('f(x_1,0)');
