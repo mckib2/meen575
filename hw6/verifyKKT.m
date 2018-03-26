@@ -11,7 +11,7 @@ function [ el,lambdas ] = verifyKKT(f,gs,xstar)
     end
 
     try
-        solstruct = solve(string(eqns),l);
+        solstruct = solve(str2sym(string(eqns)),l);
         l1 = double(solstruct.l1);
         l2 = double(solstruct.l2);
         lambdas = [ l1 l2 ].';
@@ -20,7 +20,7 @@ function [ el,lambdas ] = verifyKKT(f,gs,xstar)
         lambdas = []; el = [];
         for ii = 1:numel(eqns)
             for jj = 1:numel(l)
-                lambdas = [ lambdas double(solve(string(eqns{ii}),l(jj))) ];
+                lambdas = [ lambdas double(solve(str2sym(string(eqns{ii})),l(jj))) ];
                 el = [ el string(l(jj)) ];
             end
         end
