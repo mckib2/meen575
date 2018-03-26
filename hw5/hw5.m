@@ -21,7 +21,7 @@ Pf = eps;
 N = 40;
 n = 3;
 sigma = 2;
-show_paths = 1:10; % show paths for these x0s
+show_paths = 1:4; % show paths for these x0s
 
 %% Simulate the Annealing...
 xopts = zeros(numx0,2);
@@ -42,7 +42,8 @@ for ii = 1:numx0
 end
 dist_from_opt = sqrt(sum((xopts - [ 0 0 ]).^2,2));
 
-disp(table(x0s,xopts,fopts,nobjs,dist_from_opt));
+table0 = table(x0s,xopts,fopts,nobjs,dist_from_opt);
+disp(table0);
 
 %% Some Plots
 % Get bounds of contour plot
