@@ -58,7 +58,7 @@ f(x1,x2,x3) = x1^2 + 2*x2^2 + 3*x3^2;
 g1(x1,x2,x3) = x1 + 5*x2 - 12;
 
 % Inequality constraings, h
-g2(x1,x2,x3) = -2*x1 + x2 -4*x3 + 18;
+g2(x1,x2,x3) = -(-2*x1 + x2 -4*x3 + 18);
 
 [ A3a,b3a ] = solveKKT(f,{ g1 g2 });
 x3a = A3a\b3a;
@@ -78,8 +78,8 @@ disp(x3a(4:end));
 
 f(x1,x2) = x1^2 + x2;
 g1(x1,x2) = x1^2 + x2^2 - 9;
-g2(x1,x2) = x1 + x2^2 - 1;
-g3(x1,x2) = x1 + x2 - 1;
+g2(x1,x2) = -(x1 + x2^2 - 1);
+g3(x1,x2) = -(x1 + x2 - 1);
 
 % Look at the graph to see which constraints are binding at
 % [ -2.3723 -1.8364 ]
