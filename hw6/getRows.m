@@ -30,6 +30,6 @@ function [ r ] = getRows(gs,df,dg,svars,l)
     
     % The last rows are the constraint gradients
     for jj = 1:numel(gs)
-        r{numel(svars)+jj}(svars,l) = gs{jj};
+        r{numel(svars)+jj}(svars,l) = -gs{jj};
     end
 end

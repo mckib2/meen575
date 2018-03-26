@@ -42,6 +42,18 @@ fprintf('(1b) Optimum is at (%f,%f) with f = %f and lambda = %f\n', ...
 % ff = @(x) double(f(x(1),x(2)));
 % [ xopt,fopt ] = fmincon(ff,[ 0 5/-1.5 ],[],[],[ 2 -1.5 ],5.1);
 
+% Does the Lagrange multiplier from (a) accurately  predict the change in
+% the objective?
+dcon = .1;
+expected_diff = dcon*x1a(3);
+actual_diff = abs(f(x1a(1),x1a(2)) - f(x1b(1),x1b(2)));
+
+fprintf('\nChange in constraint: %f\n',dcon);
+fprintf('Expected change using Lagrange multiplier: %f\n',expected_diff);
+fprintf('Actual change in f: %f\n',actual_diff);
+fprintf('So we were %f off, which is pretty good, I think.\n\n', ...
+    abs(actual_diff - expected_diff));
+
 %% (1c)
 % Are the KKT equations for a problem with with a quadratic objective and a
 % linear equality constraint always linear?  Is this true for a problem
@@ -68,6 +80,13 @@ fprintf('(3) Optimum is at (%f,%f,%f) with f = %f\n', ...
 
 fprintf('lamdbas are:\n');
 disp(x3a(4:end));
+
+% Is this actually an optimum?
+% xstar = [ x3a(1) x3a(2) x3a(3) ];
+% [ l,lambdas ] = verifyKKT(f,{ g1 g2 },xstar);
+% 
+% fprintf('Lambdas are:\n');
+% disp(table(l,lambdas));
 
 % % Use fmincon to double check that the we did the right thing
 % ff = @(x) double(f(x3a(1),x3a(2),x3a(3)));
