@@ -1,4 +1,4 @@
-function [ p1,p2 ] = selectps(curr_gen,fitfun,k,n)
+function [ parents ] = select(curr_gen,k,n)
 % [ ] = select()
 % Returns k sets of parents (p1,p2) selected from the current generation
 % using a tournament size of n.
@@ -14,13 +14,20 @@ function [ p1,p2 ] = selectps(curr_gen,fitfun,k,n)
     % Randomly select n from the curr_gen
     candidates = zeros(2*k,n);
     for ii = 1:size(candidates,1)
-        candidates(ii,:) = randsample(curr_gen,n);
+        candidates(ii,:) = randsample(1:numel(curr_gen),n);
+        
+        for jj = 1:n
+            fitness(ii,jj) = curr_gen(candidates(ii,jj)).fitness;
+        end
     end
     
     % Calculate fitness
-    fitness = fitfun(candidates);
+%     fitness = candidates.fitness;
     
     % Select the most fit parents
-    [ ~,I ] = max(fitness,[],2);
-    parents = candidates(I);
+    rows = (1:size(fitness,1)).';
+    [ ~,cols ] = max(fitness,[],2);
+    cols = reshape(cols,[],1);
+    kk = sub2ind(size(fitness),rows,cols);
+    parents = reshape(curr_gen(candidates(kk)),k,2);
 end

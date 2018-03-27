@@ -1,10 +1,10 @@
-function [ next_gen ] = genalg(fitfun,curr_gen,mutrate)
+function [ next_gen ] = genalg(curr_gen,mutrate,crossrate)
 
     % selection
-    [ p1,p2 ] = select(curr_gen,fitfun,5,3);
+    [ parents ] = select(curr_gen,5,3);
     
     % crossover
-%     cross();
+    [ children ] = cross(parents,crossrate);
     
     % mutation
 %     mutate(mutrate);
