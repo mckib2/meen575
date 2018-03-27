@@ -69,7 +69,7 @@ f(x1,x2,x3) = x1^2 + 2*x2^2 + 3*x3^2;
 % Equality constraints, g
 g1(x1,x2,x3) = x1 + 5*x2 - 12;
 
-% Inequality constraings, h
+% Inequality constraints, h
 g2(x1,x2,x3) = -(-2*x1 + x2 -4*x3 + 18);
 
 [ A3a,b3a ] = solveKKT(f,{ g1 g2 });
@@ -78,15 +78,12 @@ x3a = A3a\b3a;
 fprintf('(3) Optimum is at (%f,%f,%f) with f = %f\n', ...
     x3a(1),x3a(2),x3a(3),f(x3a(1),x3a(2),x3a(3)));
 
-fprintf('lamdbas are:\n');
-disp(x3a(4:end));
-
 % Is this actually an optimum?
-% xstar = [ x3a(1) x3a(2) x3a(3) ];
-% [ l,lambdas ] = verifyKKT(f,{ g1 g2 },xstar);
-% 
-% fprintf('Lambdas are:\n');
-% disp(table(l,lambdas));
+xstar = [ x3a(1) x3a(2) x3a(3) ];
+[ l,lambdas ] = verifyKKT(f,{ g1 g2 },xstar);
+
+fprintf('Lambdas are positive, so we think we''re right:\n');
+disp(table(l,lambdas));
 
 % % Use fmincon to double check that the we did the right thing
 % ff = @(x) double(f(x3a(1),x3a(2),x3a(3)));
