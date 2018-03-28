@@ -4,6 +4,9 @@
 % MEEN 575
 % 2018-03-26
 
+clear;
+close all;
+
 %% Params
 rng('default');
 num_babies = 10;

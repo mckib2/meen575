@@ -11,7 +11,17 @@ classdef test_model
             else
                 obj.vs = v1;
             end
-            obj.fitness = sum(obj.vs);
+            
+            obj.fitness = [];
+        end
+        
+        function [ fitval ] = getFit(obj)
+            % If we haven't already found the fitness,  go ahead and do so
+            if isequal(obj.fitness,[])
+                obj.fitness = sum(obj.vs);
+            end
+            
+            fitval = obj.fitness;
         end
     end
 end

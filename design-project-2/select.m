@@ -17,7 +17,7 @@ function [ parents ] = select(curr_gen,k,n)
         candidates(ii,:) = randsample(1:numel(curr_gen),n);
         
         for jj = 1:n
-            fitness(ii,jj) = curr_gen(candidates(ii,jj)).fitness;
+            fitness(ii,jj) = curr_gen(candidates(ii,jj)).getFit();
         end
     end
     
