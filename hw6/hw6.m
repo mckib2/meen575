@@ -56,8 +56,17 @@ fprintf('So we were %f off, which is pretty good, I think.\n\n', ...
 
 %% (1c)
 % Are the KKT equations for a problem with with a quadratic objective and a
-% linear equality constraint always linear?  Is this true for a problem
-% with a quadratic objective and a linear inequality constraint?
+% linear equality constraint always linear?
+%     Yes!  Because the gradients of a quadratic function will be linear.
+%     For constraints, we do not need to worry about complementary
+%     slackness because the are equalities!
+
+% Is this true for a problem with a quadratic objective and a linear
+% inequality constraint?
+%     No - because of complementary slackness.  However, if we had a scheme
+%     to know which constraints were binding at the optimum, then the
+%     equations would be linear because the complementary slackness
+%     condition would be satisfied and we would only have linear equations.
 
 % (skip 2)?
 %% (3) KKT Equations with equality and inequality constraints
