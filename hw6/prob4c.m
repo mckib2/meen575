@@ -35,4 +35,5 @@ labels = [ "x1" "x2" "l" ].';
 
 % Let's look at it
 disp(table(labels,xopt));
-fprintf('Optimum at (%f,%f) with f = %f\n',xopt(1),xopt(2),fopt);
+fprintf('Optimum at (%f,%f) with f = %f, lambda is positive so we''re good!\n', ...
+    xopt(1),xopt(2),fopt);
