@@ -24,4 +24,4 @@ for ii = 1:num_babies
         randi([ 16 18 ],1));
 end
 
-genalg(babies,mutrate,crossrate);
+[ next_gen ] = genalg(babies,mutrate,crossrate);

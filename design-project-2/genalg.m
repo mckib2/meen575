@@ -10,8 +10,6 @@ function [ next_gen ] = genalg(curr_gen,mutrate,crossrate)
 %     mutate(mutrate);
     
     % elitism
-%     creamthecrop();
-
-    next_gen = [];
+    [ next_gen ] = creamthecrop(parents,children);
 
 end
