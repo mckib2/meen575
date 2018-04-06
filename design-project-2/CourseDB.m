@@ -9,15 +9,22 @@ classdef CourseDB < handle
             obj.courses = courses;
         end
         
-        function [ course ] = get(obj,courseID)
+        function [ course,idx ] = get(obj,courseID)
             
-            course = -1;
+            course = -1; idx = -1;
             for ii = 1:numel(obj.courses)
                 if strcmp(obj.courses(ii).id,courseID)
                     course = obj.courses(ii);
+                    idx = ii;
                     break;
                 end
             end
+        end
+        
+        function [ ] = apply(obj,id)
+            [ ~,idx ] = obj.get(id);
+            obj.courses(idx).applied = 1;
+            fprintf('%s is now applied!\n',id);
         end
         
     end

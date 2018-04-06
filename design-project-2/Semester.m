@@ -2,17 +2,15 @@ classdef Semester < handle
     properties
         courseIDs;
         courses;
-        courseDB;
     end
     
     methods
         function [ obj ] = Semester(courseIDs,courseDB)
             obj.courseIDs = courseIDs;
-            obj.courseDB = courseDB;
             
             % Get the actual courses from the database
             for ii = 1:numel(courseIDs)
-                obj.courses = [ obj.courses obj.courseDB.get(courseIDs(ii)) ];
+                obj.courses = [ obj.courses courseDB.get(courseIDs(ii)) ];
             end
             
         end
