@@ -2,6 +2,7 @@ classdef Semester < handle
     properties
         courseIDs;
         courses;
+        reqTime;
     end
     
     methods
@@ -11,6 +12,7 @@ classdef Semester < handle
             % Get the actual courses from the database
             for ii = 1:numel(courseIDs)
                 obj.courses = [ obj.courses courseDB.get(courseIDs(ii)) ];
+                obj.reqTime = obj.reqTime + obj.courses(end).reqTime;
             end
             
         end

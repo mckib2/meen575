@@ -1,5 +1,6 @@
 classdef CollegePlan < handle
     properties
+        semesters;
     end
     
     properties(Access = private)
@@ -9,6 +10,8 @@ classdef CollegePlan < handle
     methods
         
         function [ obj ] = CollegePlan(courseDB,requirements,semesters)
+            
+            obj.semesters = semesters;
             
             taken = { };
             % Make sure that the semesters are consistent
@@ -24,7 +27,16 @@ classdef CollegePlan < handle
                 good = requirements(ii).isSatisfied(taken,courseDB);
                 fprintf('Requirement %d is %d\n',ii,good);
             end
-                      
+            
+        end
+        
+        function [ val ] = getFit(obj)
+%             
+%             for ii = 1:numel(self.semesters)
+%                 for jj = 1:numel(self.semesters(ii).courses)
+%                     c = self.semesters(ii).courses(jj);
+%                     gpa = 4.3*c.timespent/(((7/9)*c.difficulty + 2/9)*c.creditHours);
+            
         end
         
     end

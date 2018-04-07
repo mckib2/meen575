@@ -50,6 +50,13 @@ classdef Requirement < handle
                     % Count
                     if ~c.applied || c.doubler
                         hrs = hrs + c.creditHours;
+                        
+                        % Only double count once
+                        if c.doubler && c.applied
+                            courseDB.removeDoubler(id{1});
+                        end
+                        
+                        % Apply the course
                         courseDB.apply(id{1});
                         
                         if hrs >= obj.reqCreditHours(jj)

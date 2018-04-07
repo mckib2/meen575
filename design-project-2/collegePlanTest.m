@@ -4,139 +4,333 @@ clear;
 
 courseDB = CourseDB([    
     % CS Courses
-    Course('CS142',3,[]);
-    Course('CS235',3,{ 'CS142' });
-    Course('CS236',3,{ 'CS235' });
-    Course('CS240',4,{ 'CS236' });
-    Course('CS340',3,{ 'CS240' });
-    Course('CS224',3,{ 'CS142' });
-    Course('CS345',3,{ 'CS224' 'CS240' });
-    Course('CS428',3,{ 'CS340' });
-    Course('CS431',3,{ 'CS340' });
-    Course('CS452',3,{ 'CS240' });
-    Course('CS355',3,{ 'CS240' 'MATH313' });
-    Course('CS455',3,{ 'CS355' 'MATH313' });
-    Course('CS256',3,{ 'CS142' });
-    Course('CS456',3,{ 'CS240' 'CS256' });
-    Course('CS324',3,{ 'CS224' 'CS240' });
-    Course('CS460',3,{ 'CS324' });
-    Course('CS462',3,{ 'CS324' 'CS340' });
-    Course('CS465',3,{ 'CS324 -c' });
-    Course('CS252',3,{ 'CS236 -c' });
-    Course('CS312',3,{ 'CS240' 'CS252' });
-    Course('CS470',3,{ 'CS312' 'MATH313' 'STAT201' });
-    Course('CS478',3,{ 'CS312' 'MATH113' 'STAT201' });
+    Course('CS142',3,[],10);
+    Course('CS235',3,{ 'CS142' },10);
+    Course('CS236',3,{ 'CS235' },10);
+    Course('CS240',4,{ 'CS236' },10);
+    Course('CS340',3,{ 'CS240' },10);
+    Course('CS224',3,{ 'CS142' },10);
+    Course('CS345',3,{ 'CS224' 'CS240' },10);
+    Course('CS428',3,{ 'CS340' },10);
+    Course('CS431',3,{ 'CS340' },10);
+    Course('CS452',3,{ 'CS240' },10);
+    Course('CS355',3,{ 'CS240' 'MATH313' },10);
+    Course('CS455',3,{ 'CS355' 'MATH313' },10);
+    Course('CS256',3,{ 'CS142' },10);
+    Course('CS456',3,{ 'CS240' 'CS256' },10);
+    Course('CS324',3,{ 'CS224' 'CS240' },10);
+    Course('CS460',3,{ 'CS324' },10);
+    Course('CS462',3,{ 'CS324' 'CS340' },10);
+    Course('CS465',3,{ 'CS324 -c' },10);
+    Course('CS252',3,{ 'CS236 -c' },10);
+    Course('CS312',3,{ 'CS240' 'CS252' },10);
+    Course('CS470',3,{ 'CS312' 'MATH313' 'STAT201' },10);
+    Course('CS478',3,{ 'CS312' 'MATH113' 'STAT201' },10);
 
     % ECEN courses
-    Course('ECEN191',.5,[]);
-    Course('ECEN220',3,{ 'CS142 -c' });
-    Course('ECEN240',4,{ 'MATH113' 'PHSCS220' });
-    Course('ECEN330',4,{ 'CS235' 'ECEN220' });
-    Course('ECEN340',4,{ 'ECEN240' });
-    Course('ECEN360',4,{ 'CS235' 'ECEN220' });
-    Course('ECEN380',4,{ 'ECEN240' 'MATH334' });
-    Course('ECEN390',3,{ 'ECEN330' 'ECEN340' 'ECEN380' });
-    Course('ECEN391',.5,{ 'ECEN240' });
-    Course('ECEN475',3,{ 'ECEN390' 'STAT201' });
-    Course('ECEN476',3,{ 'ECEN475' });
-    Course('ECEN323',4,{ 'CS235' 'ECEN220' });
-    Course('ECEN443',4,{ 'ECEN340' });
-    Course('ECEN445',4,{ 'ECEN340' });
-    Course('ECEN450',3,{ 'ECEN340' });
-    Course('ECEN452',1,{ 'ECEN450 -c' });
-    Course('ECEN462',2,{ 'ECEN360' });
-    Course('ECEN464',2,{ 'ECEN462' });
-    Course('ECEN466',2,{ 'ECEN462' });
-    Course('ECEN483',4,{ 'ECEN380' });
-    Course('ECEN485',4,{ 'ECEN380' 'STAT201' });
-    Course('ECEN487',4,{ 'ECEN380' 'STAT201' });
-    Course('ECEN424',4,{ 'ECEN323' 'ECEN330' });
-    Course('ECEN425',4,{ 'ECEN323' 'ECEN330' });
-    Course('ECEN427',4,{ 'ECEN323' 'ECEN330' });
+    Course('ECEN191',.5,[],1);
+    Course('ECEN220',3,{ 'CS142 -c' },6);
+    Course('ECEN240',4,{ 'MATH113' 'PHSCS220' },6);
+    Course('ECEN330',4,{ 'CS235' 'ECEN220' },10);
+    Course('ECEN340',4,{ 'ECEN240' },10);
+    Course('ECEN360',4,{ 'CS235' 'ECEN220' },5);
+    Course('ECEN380',4,{ 'ECEN240' 'MATH334' },5);
+    Course('ECEN390',3,{ 'ECEN330' 'ECEN340' 'ECEN380' },10);
+    Course('ECEN391',.5,{ 'ECEN240' },1);
+    Course('ECEN475',3,{ 'ECEN390' 'STAT201' },10);
+    Course('ECEN476',3,{ 'ECEN475' },10);
+    Course('ECEN323',4,{ 'CS235' 'ECEN220' },4);
+    Course('ECEN443',4,{ 'ECEN340' },4);
+    Course('ECEN445',4,{ 'ECEN340' },4);
+    Course('ECEN450',3,{ 'ECEN340' },4);
+    Course('ECEN452',1,{ 'ECEN450 -c' },2);
+    Course('ECEN462',2,{ 'ECEN360' },4);
+    Course('ECEN464',2,{ 'ECEN462' },5);
+    Course('ECEN466',2,{ 'ECEN462' },4);
+    Course('ECEN483',4,{ 'ECEN380' },5);
+    Course('ECEN485',4,{ 'ECEN380' 'STAT201' },5);
+    Course('ECEN487',4,{ 'ECEN380' 'STAT201' },6);
+    Course('ECEN424',4,{ 'ECEN323' 'ECEN330' },10);
+    Course('ECEN425',4,{ 'ECEN323' 'ECEN330' },10);
+    Course('ECEN427',4,{ 'ECEN323' 'ECEN330' },10);
 
 
     % MATH courses
-    Course('MATH112',4,[],1);
-    Course('MATH113',4,{ 'MATH112' },1);
-    Course('MATH313',3,{ 'MATH112' });
-    Course('MATH314',3,{ 'MATH113' });
-    Course('MATH334',3,{ 'MATH113' 'MATH313'});
-    Course('MATH290',3,{ 'MATH112 -c' });
-    Course('MATH341',3,{ 'MATH113' 'MATH290' });
-    Course('MATH342',3,{ 'MATH313' 'MATH341' });
-    Course('MATH352',3,{ 'MATH290' 'MATH341 -c' });
-    Course('MATH355',3,{ 'MATH313' });
-    Course('MATH371',3,{ 'MATH290' 'MATH313' });
-    Course('MATH372',3,{ 'MATH371' });
-    Course('MATH411',3,{ 'MATH334' });
-    Course('MATH447',3,{ 'MATH314' 'MATH334' });
-    Course('MATH450',3,{ 'MATH371' });
-    Course('MATH487',3,{ 'MATH371' });
+    Course('MATH112',4,[],3,1);
+    Course('MATH113',4,{ 'MATH112' },3,1);
+    Course('MATH313',3,{ 'MATH112' },3);
+    Course('MATH314',3,{ 'MATH113' },4);
+    Course('MATH334',3,{ 'MATH113' 'MATH313'},3);
+    Course('MATH290',3,{ 'MATH112 -c' },4);
+    Course('MATH341',3,{ 'MATH113' 'MATH290' },4);
+    Course('MATH342',3,{ 'MATH313' 'MATH341' },4);
+    Course('MATH352',3,{ 'MATH290' 'MATH341 -c' },3);
+    Course('MATH355',3,{ 'MATH313' },2);
+    Course('MATH371',3,{ 'MATH290' 'MATH313' },3);
+    Course('MATH372',3,{ 'MATH371' },3);
+    Course('MATH411',3,{ 'MATH334' },4);
+    Course('MATH447',3,{ 'MATH314' 'MATH334' },4);
+    Course('MATH450',3,{ 'MATH371' },4);
+    Course('MATH487',3,{ 'MATH371' },4);
 
     % Physics Courses
-    Course('PHSCS121',3,{ 'MATH112 -c' });
-    Course('PHSCS220',3,{ 'MATH113' 'PHSCS121' });
-    Course('PHSCS123',3,{ 'PHSCS121' 'MATH112' });
-    Course('PHSCS222',3,{ 'PHSCS123' 'PHSCS220' });
+    Course('PHSCS121',3,{ 'MATH112 -c' },4);
+    Course('PHSCS220',3,{ 'MATH113' 'PHSCS121' },5);
+    Course('PHSCS123',3,{ 'PHSCS121' 'MATH112' },3);
+    Course('PHSCS222',3,{ 'PHSCS123' 'PHSCS220' },4);
 
     % Statisitics courses
-    Course('STAT201',3,{ 'MATH112' })
+    Course('STAT201',3,{ 'MATH112' },2)
 
     % Chemistry Courses
-    Course('CHEM105',4,[])
+    Course('CHEM105',4,[],3)
 
     % English Courses
-    Course('ENGL316',3,{ 'WRTG150' });
+    Course('ENGL201',3,[],3);
+    Course('ENGL202',3,[],3,1);
+    Course('ENGL211',3,[],3);
+    Course('ENGL212',3,[],3,1);
+    Course('ENGL230',3,[],3);
+    Course('ENGL232',3,[],3);
+    Course('ENGL235',3,[],3);
+    Course('ENGL236',3,[],3);
+    Course('ENGL238',3,[],3);
+    Course('ENGL268',3,[],3);
+    Course('ENGL316',3,{ 'WRTG150' },4);
+    Course('ENGL310',3,{ 'WRTG150' },4);
+    Course('ENGL311',3,{ 'WRTG150' },4);
+    Course('ENGL312',3,{ 'WRTG150' },4);
+    Course('ENGL391',3,[],4);
 
     % Writing Courses
-    Course('WRTG150',3,[]);
+    Course('WRTG150',3,[],3);
     
     % Religion courses
-    Course('RELA121',2,[],1);
-    Course('RELA122',2,[],1);
-    Course('RELA275',2,[],1);
-    Course('RELA211',2,[],1);
-    Course('RELA250',2,[],1);
-    Course('RELA311R',3,[],1);
-    Course('RELC225',2,[],1);
-    Course('RELC200',2,[],1);
-    Course('RELC333',2,[],1);
-    Course('RELA212',2,[],1);
-    Course('RELA301',2,[],1);
-    Course('RELA302',2,[],1);
-    Course('RELA303R',3,[],1);
-    Course('RELA304',2,[],1);
-    Course('RELA320',2,[],1);
-    Course('RELA327',2,[],1);
-    Course('RELA392R',3,[],1);
-    Course('RELC100',2,[],1);
-    Course('RELC130',2,[],1); 
-    Course('RELC234',2,[],1);
-    Course('RELC261',2,[],1);
-    Course('RELC293R',1,[],1);
-    Course('RELC324',2,[],1);
-    Course('RELC325',2,[],1);
-    Course('RELC333',2,[],1);
-    Course('RELC341',2,[],1);
-    Course('RELC342',2,[],1);
-    Course('RELC343',2,[],1);
-    Course('RELC344',2,[],1);
-    Course('RELC350R',3,[],1);
-    Course('RELC351',2,[],1);
-    Course('RELC352',2,[],1);
-    Course('RELC353',2,[],1);
-    Course('RELC357',2,[],1);
-    Course('RELC358',2,[],1);
-    Course('RELC393R',3,[],1);
-    Course('RELC431',2,[],1);
-    Course('RELC471',2,[],1);
+    Course('RELA121',2,[],2,1);
+    Course('RELA122',2,[],2,1);
+    Course('RELA275',2,[],2,1);
+    Course('RELA211',2,[],2,1);
+    Course('RELA250',2,[],2,1);
+    Course('RELA311R',3,[],3,1);
+    Course('RELC225',2,[],2,1);
+    Course('RELC200',2,[],2,1);
+    Course('RELC333',2,[],3,1);
+    Course('RELA212',2,[],3,1);
+    Course('RELA301',2,[],3,1);
+    Course('RELA302',2,[],3,1);
+    Course('RELA303R',3,[],3,1);
+    Course('RELA304',2,[],3,1);
+    Course('RELA320',2,[],3,1);
+    Course('RELA327',2,[],3,1);
+    Course('RELA392R',3,[],3,1);
+    Course('RELC100',2,[],3,1);
+    Course('RELC130',2,[],1,1); 
+    Course('RELC234',2,[],3,1);
+    Course('RELC261',2,[],3,1);
+    Course('RELC293R',1,[],3,1);
+    Course('RELC324',2,[],3,1);
+    Course('RELC325',2,[],3,1);
+    Course('RELC333',2,[],3,1);
+    Course('RELC341',2,[],3,1);
+    Course('RELC342',2,[],3,1);
+    Course('RELC343',2,[],3,1);
+    Course('RELC344',2,[],3,1);
+    Course('RELC350R',3,[],3,1);
+    Course('RELC351',2,[],3,1);
+    Course('RELC352',2,[],3,1);
+    Course('RELC353',2,[],3,1);
+    Course('RELC357',2,[],3,1);
+    Course('RELC358',2,[],3,1);
+    Course('RELC393R',3,[],3,1);
+    Course('RELC431',2,[],3,1);
+    Course('RELC471',2,[],3,1);
     
     % School of Family Life Courses
-    Course('SFL200',3,[],1);
+    Course('SFL200',3,[],2,1);
     
     % American Heritage Courses
-    Course('AHTG100',3,[]);
+    Course('AHTG100',3,[],5);
     
+    % Econ Classes
+    Course('ECON110',3,[],6,1);
+    Course('ECON230',3,{ 'ECON110' },5);
+    
+    % HIST Courses
+    Course('HIST201',3,[],3);
+    Course('HIST202',3,[],3,1);
+    Course('HIST217',3,[],3);
+    Course('HIST290',3,[],3);
+    Course('HIST310',3,[],3);
+    Course('HIST398',3,[],3);
+    Course('HIST220',3,[],3);
+    Course('HIST221',3,[],3);
+    Course('HIST231',3,[],3);
+    Course('HIST261',3,[],3);
+    Course('HIST293',3,[],3);
+    Course('HIST302',3,[],3);
+    Course('HIST303',3,[],3);
+    Course('HIST312',3,[],3);
+    Course('HIST324',3,[],3);
+    Course('HIST333',3,[],3);
+    Course('HIST355',3,[],3);
+    Course('HIST366',3,[],3);
+    
+    % POLI Courses
+    Course('POLI150',3,[],2,1);
+    Course('POLI200',4,[],2);
+    Course('POLI201',3,[],2);
+    Course('POLI202',3,[],2,1);
+    Course('POLI210',3,{ 'POLI200' },2,1);
+    Course('POLI110',3,[],2,1);
+    Course('POLI170',3,[],2,1);
+    Course('POLI347',3,[],3);
+    Course('POLI353',3,[],3);
+    Course('POLI354',3,[],3);
+    Course('POLI385',3,[],3);
+    Course('POLI472',3,[],3);
+    
+    % ANTHRO Course
+    Course('ANTHR101',3,[],3,1);
+    Course('ANTHR110',3,[],3,1);
+    Course('ANTHR330',3,[],3);
+    Course('ANTHR335',3,[],3);
+    Course('ANTHR340',3,[],3);
+    
+    % ARTHC Course
+    Course('ARTHC111',3,[],3);
+    Course('ARTHC201',3,[],3);
+    Course('ARTHC202',3,[],3,1);
+    Course('ARTHC203',3,[],3);
+    
+    % CLCV Course
+    Course('CLCV110',3,[],4);
+    Course('CLCV201',3,[],4);
+    Course('CLCV202',3,[],4,1);
+    Course('CLCV241',3,[],4);
+    Course('CLCV245',3,[],4);
+    Course('CLCV246',3,[],4);
+    
+    % CMLIT
+    Course('CMLIT201',3,[],4);
+    Course('CMLIT202',3,[],4,1);
+    Course('CMLIT211',3,[],4);
+    Course('CMLIT212',3,[],4,1);
+
+    % ENGT Courses
+    Course('ENGT231',3,[],4,1);
+    
+    % EUROP Courses
+    Course('EUROP200',3,[],4,1);
+    Course('EUROP336R',6,[],4);
+    
+    % RECM Courses
+    Course('RECM300',3,[],2);
+    
+    % Geography Courses
+    Course('GEOG120',3,[],3);
+    Course('GEOG130',3,[],3);
+    Course('GEOG255',3,[],4);
+    Course('GEOG260',3,[],4);
+    Course('GEOG265',3,[],4);
+    Course('GEOG271',3,[],4);
+    Course('GEOG272',3,[],4);
+    Course('GEOG273',3,[],4);
+    Course('GEOG285',3,[],4);
+    
+    
+    % UNIV Courses
+    Course('UNIV291',3,{ 'WRTG150' },4,1);
+    Course('UNIV292',3,{ 'WRTG150' },4,1);
+    Course('UNIV293',3,{ 'WRTG150' },4,1);
+    Course('UNIV210R',3,[],4);
+    Course('UNIV214R',3,[],4);
+    
+    % IAS Course
+    Course('IAS221',3,[],4);
+    Course('IAS353R',3,[],4);
+    
+    % IHUM Course
+    Course('IHUM101',3,[],3);
+    Course('IHUM201',3,[],3);
+    Course('IHUM202',3,[],31);
+    Course('IHUM240',3,[],3,1);
+    Course('IHUM241',3,[],3,1);
+    Course('IHUM242',3,[],3,1);
+    Course('IHUM260',3,[],3,1);
+    Course('IHUM261',3,[],3);
+    Course('IHUM262',3,[],3);
+    
+    % MESA Courses
+    Course('MESA250',3,[],4);
+    
+    % MUSIC Courses
+    Course('MUSIC101',3,[],3)
+    Course('MUSIC201',3,[],3);
+    Course('MUSIC202',3,[],3,1);
+    Course('MUSIC203',3,[],3,1);
+    Course('MUSIC204',3,[],3);
+    
+    % PWS Courses
+    Course('PWS101',3,[],4);
+    Course('PWS150',3,[],4,1);
+
+    % SCAND Courses
+    Course('SCAND217',3,[],4,1);
+    
+    % SOC Courses
+    Course('SOC113',3,[],3);
+    Course('SOC323',3,[],4);
+    
+    % Women's Studies
+    Course('WS222',3,[],3);
+    
+    % PHIL Classes
+    Course('PHIL110',3,[],4);
+    Course('PHIL150',3,[],4);
+    Course('PHIL201',3,[],4);
+    Course('PHIL202',3,[],4,1);
+    Course('PHIL210',3,[],4);
+    Course('PHIL211',3,[],4,1);
+    Course('PHIL214',3,[],4);
+    Course('PHIL213',3,[],4);
+    Course('PHIL215',3,[],4);
+    
+    % GERM Course
+    Course('GERM217',3,[],4,1);
+    
+    % TMA
+    Course('TMA201',3,[],4);
+    Course('TMA202',3,[],4,1);
+    Course('TMA101',3,[],4);
+    Course('TMA102',3,[],4);
+    
+    % ART
+    Course('ART101',3,[],3);
+    Course('ART104',3,[],3);
+    Course('ART105',3,[],3);
+    
+    % DANCE
+    Course('DANCE260',3,[],2);
+    
+    % FNART
+    Course('FNART270R',6,[],3);
+    
+    % FREN
+    Course('FREN317',3,[],3);
+    Course('FREN321',3,[],4);
+    Course('FREN361',3,{ 'FREN321' },4);
+    Course('FREN362',3,[],3);
+    
+    % SFL
+    Course('SFL102',3,[],4);
+    
+    % BIO
+    Course('BIO100',3,[],4);
+    Course('BIO130',4,[],4);
+    
+    % PSYCH
+    Course('PSYCH111',3,[],4);
+
 ]);
 
 % Requirement 1 - Complete 21 Courses
@@ -164,46 +358,40 @@ req4 = Requirement({ 'CS236' 'CS240' 'CS340' 'CS345' 'CS428' ...
     'MATH450' 'MATH487' 'PHSCS222' },2);
 
 % Religion Requirement 1 - Complete 1 Course
-req5 = Requirement({ 'RELA121' 'RELA122' 'RELA275' },2);
+req5 = Requirement({ 'RELA121' },2);
 
 % Religion Requirement 2 - Complete 1 course
-req6 = Requirement({ 'RELA211' 'RELA250' 'RELA311R' },2);
+req6 = Requirement({ 'RELA211' },2);
 
 % Religion Requirement 3 - Complete 1 course
 req7 = Requirement({ 'RELC225' },2);
 
 % Religion Requirement 4 - Complete 1 Course
-req8 = Requirement({ 'RELC200' 'RELC333' 'SFL200' },2);
+req8 = Requirement({ 'SFL200' },2);
 
 % BYU Religion Hours Requirement 5 - Complete 14 hrs, may double count
-req9 = Requirement({ 'RELA121' 'RELA122' 'RELA211' 'RELA212' 'RELA250' ...
-    'RELA275' 'RELA301' 'RELA302' 'RELA303R' 'RELA304' 'RELA311R' ...
-    'RELA320' 'RELA327' 'RELA392R' 'RELC100' 'RELC130' 'RELC200' ...
-    'RELC225' 'RELC234' 'RELC261' 'RELC293R' 'RELC324' 'RELC325' ...
-    'RELC333' 'RELC341' 'RELC342' 'RELC343' 'RELC344' 'RELC350R' ...
-    'RELC350R' 'RELC351' 'RELC352' 'RELC353' 'RELC357' 'RELC358' ...
-    'RELC393R' 'RELC431' 'RELC471' 'RELC472' 'RELC475' 'SFL200' },14);
+req9 = Requirement({ 'RELA121' 'RELA211' 'RELC225' 'RELC234' 'RELC261' ...
+    'SFL200' },14);
 
 % American Heritage - Complete 1 option
 % Options are rows, give credits as an array
 req10 = Requirement({
-    'AHTG100' ''        '';      % Option 1.1
-    'ECON110' 'HIST220' 'GE114'; % Option 1.2
-    'HIST220' 'POLI210' '';      % Option 1.3
-    'HIST221' 'POLI110' '';      % Option 1.4
-    'HIST221' 'POLI210' '';      % Option 1.5
-    'ECON110' 'POLI210' '';      % Option 1.6
+    'AHTG100' ''       ;      % Option 1.1
+    'HIST220' 'POLI210';      % Option 1.3
+    'HIST221' 'POLI110';      % Option 1.4
+    'HIST221' 'POLI210';      % Option 1.5
+    'ECON110' 'POLI210';      % Option 1.6
     },[ 3 6 6 6 6 6 ]);
 
 % Global and Cultural Awareness - Complete 1 options
 req11 = Requirement({
     % Option 2.1 - we're only allowing this one, all the others are not in
     % line with a EE program
-    'ANTHR101' 'ANTHR110' 'ANTHR330' 'ANTHR335' 'ANTHR340' 'ANTHR343' ...
-    'ARTHC203' 'ECON230' 'ENGT231' 'EUROP200' 'EUROP336R' 'RECM300' ...
+    'ANTHR101' 'ANTHR110' 'ANTHR330' 'ANTHR335' 'ANTHR340' ...
+    'ENGT231' 'EUROP200' 'EUROP336R' 'RECM300' ...
     'GEOG120' 'GEOG130' 'GEOG255' 'GEOG260' 'GEOG265' 'GEOG271' ...
     'GEOG272' 'GEOG273' 'GEOG285' 'GERM217' 'HIST202' 'HIST231' ...
-    'HIST261' 'HIST293' 'HIST304' 'HIST333' 'HIST355' 'HIST366' ...
+    'HIST261' 'HIST293' 'HIST333' 'HIST355' 'HIST366' ...
     'UNIV292' 'IAS221' 'IAS353R' 'IHUM240' 'IHUM241' 'IHUM242' ...
     'IHUM260' 'JAPAN350' 'JAPAN351' 'JAPAN352' 'KOREA340' 'MESA250' ...
     'MUSIC203' 'MUSIC307' 'POLI170' 'POLI347' 'POLI353' 'POLI354' ...
@@ -214,113 +402,57 @@ req11 = Requirement({
 % First Year Writing - Complete 1 course
 req12 = Requirement({ 'PHIL150' 'WRTG150' },3);
 
-% Adv Written and Oral Communication - Complete 1 option
-req13 = Requirement({
-    % Option 4.1
-    'ANTHR499' 'CHEM391' 'ENGL311' 'ENGL312' 'ENGL313' 'ENGL314' ...
-    'ENGL315' 'ENGL316' 'GERM340' 'HONRS300R' 'IHUM311' 'MCOM320' ...
-    'NEURO316' 'PHIL300' 'PHSCS416' 'PSYCH307' 'RECM487';
-    
-    % Option 4.2
-    'AMST304' 'AMST490' '' '' '' '' '' '' '' '' '' '' '' '' '' '' '';
-    
-    % Option 4.3
-    'HIST200' 'HIST490' '' '' '' '' '' '' '' '' '' '' '' '' '' '' '';
-    
-    % Option 4.4 - not likely for EE
-    
-    % Option 4.5
-    'ENGL295' 'ENGL495' '' '' '' '' '' '' '' '' '' '' '' '' '' '' '';
-    
-    % Option 4.6
-    'NURS320' 'NURS339' '' '' '' '' '' '' '' '' '' '' '' '' '' '' '';
-    
-    % Option 4.7
-    'HIST200' 'MESA495' '' '' '' '' '' '' '' '' '' '' '' '' '' '' '';
-    
-    % Option 4.8
-    'MESA495' 'POLI200' '' '' '' '' '' '' '' '' '' '' '' '' '' '' '';
-    
-    % Option 4.9 - not currently offered
-    
-    % Option 4.10
-    'IAS360R' 'IAS361' '' '' '' '' '' '' '' '' '' '' '' '' '' '' '';
-    
-    % Option 4.11
-    'SOC455R' 'SOC456R' '' '' '' '' '' '' '' '' '' '' '' '' '' '' '';
-    
-    }, [ 3 6 6 6 5 6 7 11 6 ]);
-
-
-% Quantitative Reasoning - Complete 1 option
-% Fulfilled by major requirements
-% req14 = Requirement({
-%     % Option 5.1
-%     'ACC200' 'MATH102' 'MATH110' 'MATH111' 'MATH112' 'MATH113' ...
-%     'MATH118' 'MATH119' 'PHIL205' 'PSYCH308' 'SFL260' 'STAT105' ...
-%     'STAT121' 'UNIV213R' },2);
-
-% % Languages of Learning - Complete 1 option
-% Fulfilled by major requirements
-% req15 = Requirement({
-%     % Option 6.1
-%     'GEOG222' 'MATH112' 'MATH113' 'MATH118' 'MATH119' 'PHIL305' ...
-%     'POLI328' 'PSYCH308' 'STAT121';
-%     % Option 6.2 - don't consider languages
-%     % Option 6.3 - doesn't count anymore
-%     % Option 6.4 - don't consider
-%     },3 );
-
 % Civ 1 - Complete 1 course
-req16 =  Requirement({ 'ARTHC201' 'CLCV201' 'CMLIT201' 'CMLIT211' ...
+req13 =  Requirement({ 'ARTHC201' 'CLCV201' 'CMLIT201' 'CMLIT211' ...
     'ENGL201' 'ENGL211' 'HIST201' 'IHUM201' 'MUSIC201' 'PHIL201' ...
     'PHIL210' 'POLI201' 'TMA201' },3);
 
 % Civ 2 - Complete 1 course
-req17 = Requirement({ 'ARTHC202' 'CLCV202' 'CMLIT202' 'CMLIT212' ...
+req14 = Requirement({ 'ARTHC202' 'CLCV202' 'CMLIT202' 'CMLIT212' ...
     'ENGL202' 'ENGL212' 'HIST202' 'IHUM202' 'MUSIC202' 'PHIL202' ...
     'PHIL211' 'POLI202' 'TMA202' },3);
 
 % Arts - Complete 1 course
-req18 = Requirement({ 'ART101' 'ART104' 'ART105'  'ARTHC111' 'ARTHC202' ...
+req15 = Requirement({ 'ART101' 'ART104' 'ART105'  'ARTHC111' 'ARTHC202' ...
     'DANCE260' 'FNART270R' 'FREN317' 'FREN361' 'FREN362' 'GERM217' ...
     'UNIV293' 'MUSIC101' 'MUSIC202' 'MUSIC203' 'MUSIC204' 'PHIL214' ...
-    'RUSS344' 'SCAND217' 'SFL102' 'TMA101' 'TMA102' 'TMA202' 'UNIV214R'
+    'SCAND217' 'SFL102' 'TMA101' 'TMA102' 'TMA202' ... 
+    'UNIV214R' 'IHUM101' 'IHUM240' 'IHUM241' ...
     },3);
 
 % Letters - Complete 1 course
-req19 = Requirement({ 'CLCV110' 'CLCV202' 'CLCV241' 'CLCV245' 'CLCV246' ...
-    'CMLIT202' 'CMLIT212' 'CREOL340' 'ENGL202' 'ENGL212' 'ENGL230' ...
-    'ENGL232' 'ENGL235' 'ENGL236' 'ENGL238' 'ENGL268' 'ENGL300R' ...
-    'ENGL391' 'FLANG340R' 'HIST302' 'HIST303' 'HIST312' 'HIST324' ...
-    'UNIV291' 'ICLND429' 'IHUM202' 'IHUM242' 'IHUM260' 'IHUM261' ...
-    'IHUM262' 'IHUM280R' 'PHIL110' 'PHIL202' 'PHIL211' 'PHIL213' ...
-    'PHIL215' 'PHIL423R' 'POLI202' 'UNIV215R'},3);
+req16 = Requirement({ 'CLCV110' 'CLCV202' 'CLCV241' 'CLCV245' 'CLCV246' ...
+    'CMLIT202' 'CMLIT212' 'ENGL202' 'ENGL212' 'ENGL230' ...
+    'ENGL232' 'ENGL235' 'ENGL236' 'ENGL238' 'ENGL268' ...
+    'ENGL391' 'HIST302' 'HIST303' 'HIST312' 'HIST324' ...
+    'UNIV291' 'IHUM202' 'IHUM242' 'IHUM260' 'IHUM261' ...
+    'IHUM262' 'PHIL110' 'PHIL202' 'PHIL211' 'PHIL213' ...
+    'PHIL215' 'POLI202'},3);
 
 % Biological Science - Complete 1 course
-req20 = Requirement({ 'BIO100' 'BIO130' 'UNIV291' 'MMBIO121' 'MMBIO221' ...
-    'MMBIO240' 'NDFS100' 'PDBIO120' 'PWS100' 'PWS100' 'PWS150' 'PWS169' ...
-    'UNIV216R'},3);
+req17 = Requirement({ 'BIO100' 'BIO130' 'UNIV291' ...
+    'PWS150'},3);
 
 % Physical Science is covered by major requirements
 
-req21 = Requirement({ 'ANTHR101' 'ANTHR110' 'ECON110' 'ENGT231' ...
+% Social Science
+req18 = Requirement({ 'ANTHR101' 'ANTHR110' 'ECON110' 'ENGT231' ...
     'HIST217' 'HIST290' 'HIST310' 'HIST398' 'UNIV293' 'POLI110' ...
-    'POLI150' 'POLI170' 'PSYCH111' 'UNIV218R'},3);
+    'POLI150' 'POLI170' 'PSYCH111' },3);
 
 
 requirements = [ req1 req2 req4 req3 req5 req6 req7 req8 req9 req10 ...
-    req11 req12 req13  req16 req17 req18 req19 req20 ];
+    req11 req12 req13 req14 req15 req16 req17 req18 ];
 
 % This is what the GA would give us:
-sem1 = Semester({ 'WRTG150' 'MATH112' 'CHEM105' 'CS142' 'ECEN191' 'RELA275' },courseDB);
-sem2 = Semester({ 'CS235' 'MATH113' 'PHSCS121' 'AHTG100' 'RELA250' },courseDB);
-sem3 = Semester({ 'ECEN220' 'MATH313' 'PHSCS220' 'RELC225' },courseDB);
-sem4 = Semester({ 'ECEN240' 'MATH314' 'MATH334' 'SFL200' },courseDB);
+sem1 = Semester({ 'WRTG150' 'MATH112' 'CHEM105' 'CS142' 'ECEN191' 'RELA275' 'ECON110' },courseDB);
+sem2 = Semester({ 'CS235' 'MATH113' 'PHSCS121' 'AHTG100' 'RELA250' 'PHIL202' },courseDB);
+sem3 = Semester({ 'ECEN220' 'MATH313' 'PHSCS220' 'RELC225' 'HIST201' },courseDB);
+sem4 = Semester({ 'ECEN240' 'MATH314' 'MATH334' 'SFL200' 'HIST202' },courseDB);
 sem5 = Semester({ 'ECEN330' 'ECEN340' 'ECEN380' 'ECEN391' 'RELC200' },courseDB);
-sem6 = Semester({ 'ECEN360' 'STAT201' 'ECEN390' 'RELA212' },courseDB);
+sem6 = Semester({ 'ECEN360' 'STAT201' 'ECEN390' 'RELA212' 'MUSIC202' },courseDB);
 sem7 = Semester({ 'ECEN475' 'ECEN323' 'ECEN462' 'ECEN483' 'ECEN462' },courseDB);
-sem8 = Semester({ 'ECEN476' 'ENGL316' 'RELA301' 'ECEN487' 'ECEN485' },courseDB);
+sem8 = Semester({ 'ECEN476' 'ENGL316' 'RELA301' 'ECEN487' 'ECEN485' 'UNIV291' },courseDB);
 
 semesters = [ sem1 sem2 sem3 sem4 sem5 sem6 sem7 sem8 ];
 cp = CollegePlan(courseDB,requirements,semesters);
