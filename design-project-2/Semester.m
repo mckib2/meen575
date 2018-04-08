@@ -12,6 +12,8 @@ classdef Semester < handle
     methods
         function [ obj ] = Semester(courseIDs,courseDB)
             obj.courseIDs = courseIDs;
+            obj.creditHours = 0;
+            
             
             % Get the actual courses from the database
             for ii = 1:numel(courseIDs)
@@ -57,10 +59,17 @@ classdef Semester < handle
             end
         end
         
-        function [ ] = add(obj,courseID)
+        function [ ] = add(obj,courseID,courseDB)
             obj.courses = [ obj.courses courseDB.get(courseID) ];
             obj.reqTime = obj.reqTime + obj.courses(end).reqTime;
             obj.creditHours = obj.creditHours + obj.courses(end).creditHours;
+        end
+        
+        function [ ] = pop(obj)
+            c = obj.courses(end);
+            obj.courses = obj.courses(1:end-1);
+            obj.reqTime = obj.reqTime - c.reqTime;
+            obj.creditHours = obj.creditHours - c.creditHours;
         end
     end
 end

@@ -450,16 +450,72 @@ CourseBin = unique(CourseBin);
 % What are the TEs?
 TEBin = unique([ req3.courseIDs(:)' req4.courseIDs(:)' ]);
 
+% Initialize a Courses taken bin
+TakenBin = { };
+
 %% Build a single Semester
 
+rng('default');
 sem1 = Semester({ },courseDB);
-credHrs = randi(6,1,1);
-while (credHrs < 19) || ~isempty(CourseBin)
+credHrs0 = randi(6,1,1);
+credHrs = credHrs0;
+stop = false;
+while ((credHrs < 19) || ~isempty(CourseBin) || stop)
     idx = randi([ 1 numel(CourseBin) ],1,1);
     courseID = CourseBin(idx);
-    c = courseDB.get(courseID);
+    c = courseDB.get(courseID{1});
+    
+    if strcmp('CS478',courseID)
+        fprintf('Hey there\n');
+    end
     
     % Check for prereqs
+    prereqs = unique(findPrereq(c,courseDB));
     
-    
+    if ~isequal(prereqs,c)
+        % Remove courses that we have already taken
+        try
+            prereqs = setdiff(prereqs,TakenBin);
+        catch
+        end
+        
+        % Add all the courses that we can
+        for ii = 1:numel(prereqs)
+            if ~(credHrs + prereqs(ii).creditHours > 18)
+                sem1.add(prereqs(ii).id,courseDB);
+                
+                if ~sem1.isConsistent(TakenBin)
+                    sem1.pop();
+                else
+                    credHrs = sem1.creditHours + credHrs0;
+                end
+            else
+                stop = 1;
+            end
+        end
+    else
+        if ~(credHrs + c.creditHours > 18)
+            sem1.add(c.id,courseDB);
+            credHrs = sem1.creditHours + credHrs0;
+        else
+            stop = 1;
+        end
+    end
+end
+
+
+
+function [ prereqs ] = findPrereq(course,courseDB)
+    fprintf('Started to find prereqs...\n');
+    prereqs = [];
+    if isempty(course.prereqs)
+        prereqs = course;
+        return;
+    else
+        for ii = 1:numel(course.prereqs)
+            cid = split(course.prereqs{ii});
+            p = courseDB.get(cid{1});
+            prereqs = [ prereqs p findPrereq(p,courseDB) ];
+        end
+    end
 end
