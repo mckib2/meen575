@@ -3,6 +3,10 @@ classdef Semester < handle
         courseIDs;
         courses;
         reqTime;
+        creditHours;
+        gpa;
+        miscHours;
+        workHours;
     end
     
     methods
@@ -13,6 +17,7 @@ classdef Semester < handle
             for ii = 1:numel(courseIDs)
                 obj.courses = [ obj.courses courseDB.get(courseIDs(ii)) ];
                 obj.reqTime = obj.reqTime + obj.courses(end).reqTime;
+                obj.creditHours = obj.creditHours + obj.courses(end).creditHours;
             end
             
         end
@@ -50,6 +55,12 @@ classdef Semester < handle
                 end
                 
             end
+        end
+        
+        function [ ] = add(obj,courseID)
+            obj.courses = [ obj.courses courseDB.get(courseID) ];
+            obj.reqTime = obj.reqTime + obj.courses(end).reqTime;
+            obj.creditHours = obj.creditHours + obj.courses(end).creditHours;
         end
     end
 end

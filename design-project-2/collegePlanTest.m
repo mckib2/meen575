@@ -253,7 +253,7 @@ courseDB = CourseDB([
     Course('IHUM101',3,[],3);
     Course('IHUM201',3,[],3);
     Course('IHUM202',3,[],31);
-    Course('IHUM240',3,[],3,1);
+    Course('IHUM240',3,[],3,2);
     Course('IHUM241',3,[],3,1);
     Course('IHUM242',3,[],3,1);
     Course('IHUM260',3,[],3,1);
@@ -330,6 +330,9 @@ courseDB = CourseDB([
     
     % PSYCH
     Course('PSYCH111',3,[],4);
+    
+    % EMPTY
+    Course('EMPTY',0,[],0);
 
 ]);
 
@@ -370,93 +373,93 @@ req7 = Requirement({ 'RELC225' },2);
 req8 = Requirement({ 'SFL200' },2);
 
 % BYU Religion Hours Requirement 5 - Complete 14 hrs, may double count
-req9 = Requirement({ 'RELA121' 'RELA211' 'RELC225' 'RELC234' 'RELC261' ...
-    'SFL200' },14);
+req9 = Requirement({ 'RELA121' 'RELA211' 'RELC225' 'RELC234' ...
+    'RELC351' 'SFL200' 'RELA301' },14);
 
 % American Heritage - Complete 1 option
 % Options are rows, give credits as an array
 req10 = Requirement({
     'AHTG100' ''       ;      % Option 1.1
-    'HIST220' 'POLI210';      % Option 1.3
+    %'HIST220' 'POLI210';      % Option 1.3
     'HIST221' 'POLI110';      % Option 1.4
-    'HIST221' 'POLI210';      % Option 1.5
-    'ECON110' 'POLI210';      % Option 1.6
-    },[ 3 6 6 6 6 6 ]);
+    %'HIST221' 'POLI210';      % Option 1.5
+    %'ECON110' 'POLI210';      % Option 1.6
+    },[ 3 6 ]);
 
 % Global and Cultural Awareness - Complete 1 options
 req11 = Requirement({
     % Option 2.1 - we're only allowing this one, all the others are not in
     % line with a EE program
-    'ANTHR101' 'ANTHR110' 'ANTHR330' 'ANTHR335' 'ANTHR340' ...
-    'ENGT231' 'EUROP200' 'EUROP336R' 'RECM300' ...
-    'GEOG120' 'GEOG130' 'GEOG255' 'GEOG260' 'GEOG265' 'GEOG271' ...
-    'GEOG272' 'GEOG273' 'GEOG285' 'GERM217' 'HIST202' 'HIST231' ...
-    'HIST261' 'HIST293' 'HIST333' 'HIST355' 'HIST366' ...
-    'UNIV292' 'IAS221' 'IAS353R' 'IHUM240' 'IHUM241' 'IHUM242' ...
-    'IHUM260' 'JAPAN350' 'JAPAN351' 'JAPAN352' 'KOREA340' 'MESA250' ...
-    'MUSIC203' 'MUSIC307' 'POLI170' 'POLI347' 'POLI353' 'POLI354' ...
-    'POLI385' 'POLI472' 'PWS101' 'PWS150' 'RELC351' 'RELC352' 'RELC357' ...
-    'RELC358' 'SCAND217' 'SOC113' 'SOC323' 'UNIV210R' 'WS222';
-    },3);
+    'ANTHR101' ...
+    'GEOG120' 'GERM217' 'HIST202' ...
+    'IHUM240' 'IHUM242' ...
+    'PWS150' 'RELC351' },3);
 
 % First Year Writing - Complete 1 course
-req12 = Requirement({ 'PHIL150' 'WRTG150' },3);
+req12 = Requirement({ 'WRTG150' },3);
 
 % Civ 1 - Complete 1 course
-req13 =  Requirement({ 'ARTHC201' 'CLCV201' 'CMLIT201' 'CMLIT211' ...
-    'ENGL201' 'ENGL211' 'HIST201' 'IHUM201' 'MUSIC201' 'PHIL201' ...
-    'PHIL210' 'POLI201' 'TMA201' },3);
+req13 =  Requirement({ 'ARTHC201' },3);
 
 % Civ 2 - Complete 1 course
-req14 = Requirement({ 'ARTHC202' 'CLCV202' 'CMLIT202' 'CMLIT212' ...
-    'ENGL202' 'ENGL212' 'HIST202' 'IHUM202' 'MUSIC202' 'PHIL202' ...
-    'PHIL211' 'POLI202' 'TMA202' },3);
+req14 = Requirement({ 'HIST202' 'ARTHC202' 'CLCV202' },3);
 
 % Arts - Complete 1 course
-req15 = Requirement({ 'ART101' 'ART104' 'ART105'  'ARTHC111' 'ARTHC202' ...
-    'DANCE260' 'FNART270R' 'FREN317' 'FREN361' 'FREN362' 'GERM217' ...
-    'UNIV293' 'MUSIC101' 'MUSIC202' 'MUSIC203' 'MUSIC204' 'PHIL214' ...
-    'SCAND217' 'SFL102' 'TMA101' 'TMA102' 'TMA202' ... 
-    'UNIV214R' 'IHUM101' 'IHUM240' 'IHUM241' ...
-    },3);
+req15 = Requirement({ 'GERM217' 'ARTHC202' 'IHUM240' 'ART101' ...
+    'UNIV293' },3);
 
 % Letters - Complete 1 course
-req16 = Requirement({ 'CLCV110' 'CLCV202' 'CLCV241' 'CLCV245' 'CLCV246' ...
-    'CMLIT202' 'CMLIT212' 'ENGL202' 'ENGL212' 'ENGL230' ...
-    'ENGL232' 'ENGL235' 'ENGL236' 'ENGL238' 'ENGL268' ...
-    'ENGL391' 'HIST302' 'HIST303' 'HIST312' 'HIST324' ...
-    'UNIV291' 'IHUM202' 'IHUM242' 'IHUM260' 'IHUM261' ...
-    'IHUM262' 'PHIL110' 'PHIL202' 'PHIL211' 'PHIL213' ...
-    'PHIL215' 'POLI202'},3);
+req16 = Requirement({ 'IHUM240' 'IHUM242' 'CLCV202' 'CLCV241' ...
+    'UNIV291' },3);
 
 % Biological Science - Complete 1 course
-req17 = Requirement({ 'BIO100' 'BIO130' 'UNIV291' ...
-    'PWS150'},3);
+req17 = Requirement({ 'UNIV291' 'PWS150' 'BIO100' 'BIO130' },3);
 
 % Physical Science is covered by major requirements
 
 % Social Science
-req18 = Requirement({ 'ANTHR101' 'ANTHR110' 'ECON110' 'ENGT231' ...
-    'HIST217' 'HIST290' 'HIST310' 'HIST398' 'UNIV293' 'POLI110' ...
-    'POLI150' 'POLI170' 'PSYCH111' },3);
+req18 = Requirement({ 'POLI110' 'ANTHR101' 'UNIV293' ...
+    'HIST217' },3);
 
 
 requirements = [ req1 req2 req4 req3 req5 req6 req7 req8 req9 req10 ...
     req11 req12 req13 req14 req15 req16 req17 req18 ];
 
-% This is what the GA would give us:
-sem1 = Semester({ 'WRTG150' 'MATH112' 'CHEM105' 'CS142' 'ECEN191' 'RELA275' 'ECON110' },courseDB);
-sem2 = Semester({ 'CS235' 'MATH113' 'PHSCS121' 'AHTG100' 'RELA250' 'PHIL202' },courseDB);
-sem3 = Semester({ 'ECEN220' 'MATH313' 'PHSCS220' 'RELC225' 'HIST201' },courseDB);
-sem4 = Semester({ 'ECEN240' 'MATH314' 'MATH334' 'SFL200' 'HIST202' },courseDB);
-sem5 = Semester({ 'ECEN330' 'ECEN340' 'ECEN380' 'ECEN391' 'RELC200' },courseDB);
-sem6 = Semester({ 'ECEN360' 'STAT201' 'ECEN390' 'RELA212' 'MUSIC202' },courseDB);
-sem7 = Semester({ 'ECEN475' 'ECEN323' 'ECEN462' 'ECEN483' 'ECEN462' },courseDB);
-sem8 = Semester({ 'ECEN476' 'ENGL316' 'RELA301' 'ECEN487' 'ECEN485' 'UNIV291' },courseDB);
+% % This is what the GA would give us:
+% sem1 = Semester({ 'WRTG150' 'MATH112' 'CHEM105' 'CS142' 'ECEN191' 'RELA121' },courseDB);
+% sem2 = Semester({ 'CS235' 'MATH113' 'PHSCS121' 'AHTG100' 'RELA211' 'PHIL202' },courseDB);
+% sem3 = Semester({ 'ECEN220' 'MATH313' 'PHSCS220' 'RELC225' 'ARTHC201' },courseDB);
+% sem4 = Semester({ 'ECEN240' 'MATH314' 'MATH334' 'SFL200' 'HIST202' },courseDB);
+% sem5 = Semester({ 'ECEN330' 'ECEN340' 'ECEN380' 'ECEN391' 'RELC351' },courseDB);
+% sem6 = Semester({ 'ECEN360' 'STAT201' 'ECEN390' 'RELC234' 'UNIV293' },courseDB);
+% sem7 = Semester({ 'ECEN475' 'ECEN323' 'ECEN462' 'ECEN483' 'ECEN462' },courseDB);
+% sem8 = Semester({ 'ECEN476' 'ENGL316' 'RELA301' 'ECEN487' 'ECEN485' 'UNIV291' },courseDB);
+% 
+% semesters = [ sem1 sem2 sem3 sem4 sem5 sem6 sem7 sem8 ];
+% cp = CollegePlan(courseDB,requirements,semesters);
+% 
+% 
 
-semesters = [ sem1 sem2 sem3 sem4 sem5 sem6 sem7 sem8 ];
-cp = CollegePlan(courseDB,requirements,semesters);
+%% Construct the Course Bin
+CourseBin = {};
+for ii = 1:numel(requirements)
+    CourseBin = [ CourseBin requirements(ii).courseIDs(:)'];
+end
+CourseBin = unique(CourseBin);
 
+% What are the TEs?
+TEBin = unique([ req3.courseIDs(:)' req4.courseIDs(:)' ]);
 
+%% Build a single Semester
 
-
+sem1 = Semester({ },courseDB);
+credHrs = randi(6,1,1);
+while (credHrs < 19) || ~isempty(CourseBin)
+    idx = randi([ 1 numel(CourseBin) ],1,1);
+    courseID = CourseBin(idx);
+    c = courseDB.get(courseID);
+    
+    % Check for prereqs
+    
+    
+end

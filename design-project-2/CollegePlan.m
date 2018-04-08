@@ -30,6 +30,10 @@ classdef CollegePlan < handle
             
         end
         
+        function [ val ] = works(obj)
+            
+        end
+        
         function [ val ] = getFit(obj)
 %             
 %             for ii = 1:numel(self.semesters)

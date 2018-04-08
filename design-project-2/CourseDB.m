@@ -29,7 +29,7 @@ classdef CourseDB < handle
         
         function [ ] = removeDoubler(obj,id)
             [ ~,idx ] = obj.get(id);
-            obj.courses(idx).doubler = 0;
+            obj.courses(idx).doubler = obj.courses(idx).doubler - 1;
             fprintf('%s double counted!\n',id);
         end
         
