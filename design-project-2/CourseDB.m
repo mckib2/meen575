@@ -24,13 +24,13 @@ classdef CourseDB < handle
         function [ ] = apply(obj,id)
             [ ~,idx ] = obj.get(id);
             obj.courses(idx).applied = 1;
-            fprintf('%s is now applied!\n',id);
+            %fprintf('%s is now applied!\n',id);
         end
         
         function [ ] = removeDoubler(obj,id)
             [ ~,idx ] = obj.get(id);
             obj.courses(idx).doubler = obj.courses(idx).doubler - 1;
-            fprintf('%s double counted!\n',id);
+            %fprintf('%s double counted!\n',id);
         end
         
     end

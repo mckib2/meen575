@@ -7,7 +7,7 @@ classdef Requirement < handle
     methods
         
         function [ obj ] = Requirement(courseIDs,reqCreditHours)
-            obj.courseIDs = setdiff(courseIDs,''); % remove empty strings
+            obj.courseIDs = courseIDs;
             obj.reqCreditHours = reqCreditHours;
         end
         
@@ -18,10 +18,14 @@ classdef Requirement < handle
             % Each row is a different option, we just need to find an
             % option that we've satisfied.
             for jj = 1:size(obj.courseIDs,1)
-
+                
                 % Find all the courseIDs we can and then count up the credit
                 % hours to see if we have enough
                 foundCourseIDs = intersect(takenCourseIDs,obj.courseIDs(jj,:));
+%                 
+%                 if isequal(obj.courseIDs(1),{'AHTG100'}) && numel(foundCourseIDs)
+%                     disp('Hey');
+%                 end
                 
                 % Sort by credit hours so we use the least first
                 hr = zeros(numel(foundCourseIDs),1);
@@ -59,14 +63,17 @@ classdef Requirement < handle
                         % Apply the course
                         courseDB.apply(id{1});
                         
-                        if hrs >= obj.reqCreditHours(jj)
-                            val = 1;
-                            return;
+                        try
+                            if hrs >= obj.reqCreditHours(jj)
+                                val = 1;
+                                return;
+                            end
+                        catch
+                            fprintf('Trouble.\n');
                         end
                     end
                 end
             end
         end
-        
     end
 end

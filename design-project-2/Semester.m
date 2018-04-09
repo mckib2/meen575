@@ -14,7 +14,6 @@ classdef Semester < handle
             obj.courseIDs = courseIDs;
             obj.creditHours = 0;
             
-            
             % Get the actual courses from the database
             for ii = 1:numel(courseIDs)
                 obj.courses = [ obj.courses courseDB.get(courseIDs(ii)) ];
@@ -45,11 +44,31 @@ classdef Semester < handle
                     % requirements because we know the whole history!
                     % Now check to see if it's in your previously taken
                     % classes:
-                    if ~any(strcmp(coursesTaken,id)) &&  ...
-                        ~(concurrent && any(strcmp(obj.courseIDs,id)))
+                    if isobject(coursesTaken)
+                        for kk = 1:numel(coursesTaken)
+
+                            if strcmp(coursesTaken(kk).id,id)
+                                val = 1;
+                                break;
+                            elseif (concurrent && any(strcmp(obj.courseIDs,id)))
+                                val = 1;
+                                break;
+                            else
+                                val = -1;
+                                %fprintf('You haven''t taken %s yet!\n',id);
+                                %return;
+                            end
+                        end
+                    else
+                         if ~any(strcmp(coursesTaken,id)) &&  ...
+                            ~(concurrent && any(strcmp(obj.courseIDs,id)))
+                            val = -1;
+                         end
+                    end
                     
-                        fprintf('You haven''t taken %s yet!\n',id);
-                        val = -1;
+                    if val == -1
+                        %fprintf('You haven''t taken %s yet!\n',id);
+                        return;
                     end
                     
                     concurrent = 0;
@@ -60,12 +79,14 @@ classdef Semester < handle
         end
         
         function [ ] = add(obj,courseID,courseDB)
+            obj.courseIDs = [ obj.courseIDs courseID ];
             obj.courses = [ obj.courses courseDB.get(courseID) ];
             obj.reqTime = obj.reqTime + obj.courses(end).reqTime;
             obj.creditHours = obj.creditHours + obj.courses(end).creditHours;
         end
         
         function [ ] = pop(obj)
+            obj.courseIDs = obj.courseIDs(1:end-1);
             c = obj.courses(end);
             obj.courses = obj.courses(1:end-1);
             obj.reqTime = obj.reqTime - c.reqTime;
