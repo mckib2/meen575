@@ -29,14 +29,19 @@ clear;
 
 %% Build A College Plan
 
-rng('default');
+% rng('default');
 [ requirements ] = getRequirements();
-collegePlan = CollegePlan(requirements,[]);
-a = 0; b = 0;
-while ~all(b)
-    collegePlan.generateSemester();
-    [ a,b ] = collegePlan.isConsistent();
-    fprintf('%d\n',sum(b));
-end
 
-fprintf('Number of semesters: %d\n',numel(collegePlan.semesters));
+% Make a number of them
+num_gen = 30;
+% collegePlans = { };
+for ii = 1:num_gen
+    collegePlans(ii) = CollegePlan(requirements,[]);
+    a = 0; b = 0;
+    while ~all(b)
+        collegePlans(ii).generateSemester();
+        [ a,b ] = collegePlans(ii).isConsistent();
+        % fprintf('%d\n',sum(b));
+    end
+    fprintf('Number of semesters: %d\n',numel(collegePlans(ii).semesters));
+end

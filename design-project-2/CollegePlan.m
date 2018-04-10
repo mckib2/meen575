@@ -19,11 +19,7 @@ classdef CollegePlan < handle
             obj.requirements = requirements;
             
             % Construct the course bin
-            obj.CourseBin = {};
-            for ii = 1:numel(obj.requirements)
-                obj.CourseBin = [ obj.CourseBin obj.requirements(ii).courseIDs(:)'];
-            end
-            obj.CourseBin = unique(setdiff(obj.CourseBin,''));
+            obj.CourseBin = obj.getCourseBin();
             
             % Initialize the taken courses bin
             obj.TakenBin = obj.courseDB.get('EMPTY');
@@ -67,17 +63,43 @@ classdef CollegePlan < handle
             obj.courseDB = getCourseDB();
         end
         
-        function [ sem ] = generateSemester(obj)
-            % Start with a fresh semester
-            sem = Semester({ });
+        function [ sem ] = generatePrefSemester(obj,sem)
+            for ii = 1:numel(sem.courseIDs)
+                c = obj.courseDB.get(sem.courseIDs(ii));
+                if ismember(c.id,obj.CourseBin)
+                    % Check prereqs
+                    prereqs = findPrereq(c,obj.courseDB);
+                    if isequal(prereqs,c)
+                        sem.add(c.id,obj.courseDB);
+                    end
+                end
+            end
             
-            %  Choose a level to start the credit bucket at
-            credHrs0 = randi(6,1,1);
-            credHrs = credHrs0;
+            obj.TakenBin = obj.getTakenBin();
+            obj.CourseBin = obj.getCourseBin();
+            sem = obj.generateSemester(sem,18 - sem.creditHours);
+        end
+        
+        function [ sem ] = generateSemester(obj,varargin)
+            % Start with a fresh semester
+            
+            if nargin > 1
+                sem = varargin{1};
+                credHrs0 = varargin{2};
+                credHrs = sem.creditHours + credHrs0;
+            else
+                sem = Semester({ });
+                
+                %  Choose a level to start the credit bucket at
+                credHrs0 = randi(6,1,1);
+                credHrs = credHrs0;
+            end
             
             % Keep adding courses till we run out of room
             stop = false;
-            while ((credHrs < 19) && ~isempty(obj.CourseBin) && ~stop)
+            cntr = 0;
+            while ((credHrs < 19) && ~isempty(obj.CourseBin) && ~stop && (cntr < 10))
+                cntr = cntr + 1;
                 idx = randi([ 1 numel(obj.CourseBin) ],1,1);
                 courseID = obj.CourseBin(idx);
                 c = obj.courseDB.get(courseID{1});
@@ -85,9 +107,30 @@ classdef CollegePlan < handle
                 % Check for prereqs
                 prereqs = unique(findPrereq(c,obj.courseDB));
 
+                numprereqs = numel(prereqs);
+                
                 if ~isequal(prereqs,c)
                     % Remove courses that we have already taken
-                    prereqs = setdiff(prereqs,obj.TakenBin);
+                    % prereqs = setdiff(prereqs,obj.TakenBin);
+                    % This actually takes a double loop because MATLAB
+                    % object arrays don't support set operations...
+                    prereqs2 = [];
+                    for kk = 1:numel(prereqs)
+                        hastaken = 0;
+                        for mm = 1:numel(obj.TakenBin)
+                            if strcmp(prereqs(kk).id,obj.TakenBin(mm).id)
+                                hastaken = 1;
+                            end
+                        end
+                        
+                        if ~hastaken
+                            prereqs2 = [ prereqs2 prereqs(kk) ];
+                        end
+                    end
+                    if ~isempty(prereqs2)
+                        prereqs = prereqs2;
+                    end
+ 
 
                     % Add all the courses that we can
                     for ii = 1:numel(prereqs)
@@ -112,13 +155,41 @@ classdef CollegePlan < handle
                                     % Take this course out of the running - We
                                     % got it!
                                     obj.CourseBin = setdiff(obj.CourseBin,prereqs(ii).id);
+                                    
+                                    % Additionally, if this course
+                                    % completed a requirement, we need to
+                                    % take out all of those types of
+                                    % classes that fulfill the requirement.
+                                    %[ ~,b ] = obj.isConsistent();
+                                    %for nn = 1:numel(obj.requirements)
+                                    %    if b(nn)
+                                    %        obj.CourseBin = setdiff(obj.CourseBin,obj.requirements(nn).courseIDs);
+                                    %    end
+                                    %end
+                                    TakenIDs = {};
+                                    for nn = 1:numel(obj.TakenBin)
+                                        TakenIDs = [ TakenIDs obj.TakenBin(nn).id ];
+                                    end
+                                    for nn = 1:numel(obj.requirements)
+                                        if obj.requirements(nn).isSatisfied([ TakenIDs sem.courseIDs ],obj.courseDB)
+                                            obj.CourseBin = setdiff(obj.CourseBin,obj.requirements(nn).courseIDs);
+                                        end
+                                    end
+                                    
+                                    % If req 3 is not satisfied, then add
+                                    % those classes back in minus the ones
+                                    % that you've taken
+                                    if ~obj.requirements(4).isSatisfied([ TakenIDs sem.courseIDs ],obj.courseDB)
+                                        obj.CourseBin = setdiff(union(obj.CourseBin,obj.requirements(4).courseIDs),[ TakenIDs sem.courseIDs ]);
+                                    end
+                                    
                                 end
                             else
                                 % This means all the prereqs were
                                 % satisfied, so add the course proper
                                 sem.add(c.id,obj.courseDB);
                                 
-                                 if sem.isConsistent(obj.TakenBin) <= 0
+                                 if (sem.isConsistent(obj.TakenBin) <= 0) && (numel(obj.CourseBin) > 1)
                                     sem.pop();
                                  else
                                     credHrs = sem.creditHours + credHrs0;
@@ -135,7 +206,7 @@ classdef CollegePlan < handle
                     end
                 else
                     if ~(credHrs + c.creditHours > 18)
-                        
+
                         doit = 1;
                         for kk = 1:numel(obj.TakenBin)
                             if strcmp(c.id,obj.TakenBin(kk).id) || ismember(c.id,sem.courseIDs)
@@ -149,6 +220,34 @@ classdef CollegePlan < handle
                             sem.add(c.id,obj.courseDB);
                             credHrs = sem.creditHours + credHrs0;
                             obj.CourseBin = setdiff(obj.CourseBin,c.id);
+                            
+                            % Additionally, if this course
+                            % completed a requirement, we need to
+                            % take out all of those types of
+                            % classes that fulfill the requirement.
+                            %[ ~,b ] = obj.isConsistent();
+                            %for nn = 1:numel(obj.requirements)
+                            %    if b(nn)
+                            %        obj.CourseBin = setdiff(obj.CourseBin,obj.requirements(nn).courseIDs);
+                            %    end
+                            %end
+                            TakenIDs = {};
+                            for nn = 1:numel(obj.TakenBin)
+                                TakenIDs = [ TakenIDs obj.TakenBin(nn).id ];
+                            end
+                            for nn = 1:numel(obj.requirements)
+                                isSat = obj.requirements(nn).isSatisfied([ TakenIDs sem.courseIDs ],obj.courseDB);
+                                if isSat
+                                    obj.CourseBin = setdiff(obj.CourseBin,obj.requirements(nn).courseIDs);
+                                end
+                            end
+                            
+                            % If req 3 is not satisfied, then add
+                            % those classes back in minus the ones
+                            % that you've taken
+                            if ~obj.requirements(4).isSatisfied([ TakenIDs sem.courseIDs ],obj.courseDB)
+                                obj.CourseBin = setdiff(union(obj.CourseBin,obj.requirements(4).courseIDs),[ TakenIDs sem.courseIDs ]);
+                            end
                         end
                     else
                         stop = 1;
@@ -158,7 +257,9 @@ classdef CollegePlan < handle
             end
             
             % Now add the semester object to the list of semesters
-            obj.semesters = [ obj.semesters sem ];
+            if ~isempty(sem.courseIDs)
+                obj.semesters = [ obj.semesters sem ];
+            end
             
             % Also add the classes we just added in the semester to the
             % running taken courses list
@@ -177,6 +278,77 @@ classdef CollegePlan < handle
 %             if ~ismember(obj.CourseBin,'EMPTY')
 %                 obj.CourseBin = [ 'EMPTY' obj.CourseBin ];
 %             end
+        end
+        
+        function [ ] = print(obj)
+            % Print out each semester
+            for ii = 1:numel(obj.semesters)
+                fprintf('Semester %d:\n',ii)
+                sem_list = join(obj.semesters(ii).courseIDs);
+                fprintf('\t %s\n',sem_list{1});
+            end
+        end
+       
+        function [ ] = mutate(obj)
+            % Randomly choose a semester that will be mutated
+            idx = randi([ 1 numel(obj.semesters) ],1,1);
+            obj.semesters(idx+1:end) = [];
+            
+            % Reset the CourseBin and TakenBin
+            obj.TakenBin = obj.getTakenBin();
+            obj.CourseBin = obj.getCourseBin();
+            
+            % Generate new semesters from here onwards
+            b = 0;
+            while ~all(b)
+                obj.generateSemester();
+                [ ~,b ] = obj.isConsistent();
+            end
+            
+        end
+        
+        function [ takenBin ] = getTakenBin(obj)
+            takenBin = [];
+            for ii = 1:numel(obj.semesters)
+                takenBin = [ takenBin obj.semesters(ii).courses(:)' ];
+            end
+        end
+        
+        function [ courseBin ] = getCourseBin(obj)
+            
+            % Default course bin construction
+            courseBin = {};
+            for ii = 1:numel(obj.requirements)
+                courseBin = [ courseBin obj.requirements(ii).courseIDs(:)'];
+            end
+            courseBin = unique(setdiff(courseBin,''));
+            
+            % Get Course IDs
+            TakenIDs = {};
+            for ii = 1:numel(obj.TakenBin)
+                TakenIDs = [ TakenIDs obj.TakenBin(ii).id ];
+            end
+
+            % Now remove courses based on requirements
+            for nn = 1:numel(obj.requirements)
+                isSat = obj.requirements(nn).isSatisfied(TakenIDs,obj.courseDB);
+                if isSat
+                    courseBin = setdiff(courseBin,obj.requirements(nn).courseIDs);
+                end
+            end
+
+            % If req 3 is not satisfied, then add
+            % those classes back in minus the ones
+            % that you've taken
+            if ~obj.requirements(4).isSatisfied(TakenIDs,obj.courseDB)
+                courseBin = setdiff(union(courseBin,obj.requirements(4).courseIDs),TakenIDs);
+            end
+
+            % Remove the courses taken
+            for ii = 1:numel(obj.TakenBin)
+                courseBin = setdiff(courseBin,obj.TakenBin(ii).id);
+            end
+
         end
         
     end

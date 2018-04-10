@@ -24,21 +24,21 @@ function [ requirements, TEBin ] = getRequirements()
         'MATH352' 'MATH355' 'MATH371' 'MATH372' 'MATH411' 'MATH447' ...
         'MATH450' 'MATH487' 'PHSCS222' },2);
 
-    % Religion Requirement 1 - Complete 1 Course
-    req5 = Requirement({ 'RELA121' },2);
-
-    % Religion Requirement 2 - Complete 1 course
-    req6 = Requirement({ 'RELA211' },2);
-
-    % Religion Requirement 3 - Complete 1 course
-    req7 = Requirement({ 'RELC225' },2);
-
-    % Religion Requirement 4 - Complete 1 Course
-    req8 = Requirement({ 'SFL200' },2);
+%     % Religion Requirement 1 - Complete 1 Course
+%     req5 = Requirement({ 'RELA121' },2);
+% 
+%     % Religion Requirement 2 - Complete 1 course
+%     req6 = Requirement({ 'RELA211' },2);
+% 
+%     % Religion Requirement 3 - Complete 1 course
+%     req7 = Requirement({ 'RELC225' },2);
+% 
+%     % Religion Requirement 4 - Complete 1 Course
+%     req8 = Requirement({ 'SFL200' },2);
 
     % BYU Religion Hours Requirement 5 - Complete 14 hrs, may double count
     req9 = Requirement({ 'RELA121' 'RELA211' 'RELC225' 'RELC234' ...
-        'RELC351' 'SFL200' 'RELA301' },14);
+        'RELC351' 'SFL200' 'RELA301' 'RELC333' },14);
 
     % American Heritage - Complete 1 option
     % Options are rows, give credits as an array
@@ -66,7 +66,7 @@ function [ requirements, TEBin ] = getRequirements()
     req13 =  Requirement({ 'ARTHC201' },3);
 
     % Civ 2 - Complete 1 course
-    req14 = Requirement({ 'HIST202' 'ARTHC202' 'CLCV202' },3);
+    req14 = Requirement({ 'HIST202' 'ARTHC202' 'CLCV202' 'CMLIT202' },3);
 
     % Arts - Complete 1 course
     req15 = Requirement({ 'GERM217' 'ARTHC202' 'IHUM240' 'ART101' ...
@@ -86,7 +86,7 @@ function [ requirements, TEBin ] = getRequirements()
         'HIST217' },3);
 
 
-    requirements = [ req1 req2 req4 req3 req5 req6 req7 req8 req9 req10 ...
+    requirements = [ req1 req2 req4 req3 req9 req10 ...
         req11 req12 req13 req14 req15 req16 req17 req18 ];
 
     % What are the TEs?

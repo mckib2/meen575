@@ -92,5 +92,6 @@ classdef Semester < handle
             obj.reqTime = obj.reqTime - c.reqTime;
             obj.creditHours = obj.creditHours - c.creditHours;
         end
+        
     end
 end
