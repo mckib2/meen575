@@ -2,7 +2,9 @@
 close all;
 clear;
 
-% % This is what the GA would give us:
+% %% This is the ECEN recommended schedule
+% courseDB = getCourseDB();
+% requirements = getRequirements();
 % sem1 = Semester({ 'WRTG150' 'MATH112' 'CHEM105' 'CS142' 'ECEN191' 'RELA121' },courseDB);
 % sem2 = Semester({ 'CS235' 'MATH113' 'PHSCS121' 'AHTG100' 'RELA211' 'PHIL202' },courseDB);
 % sem3 = Semester({ 'ECEN220' 'MATH313' 'PHSCS220' 'RELC225' 'ARTHC201' },courseDB);
@@ -13,35 +15,43 @@ clear;
 % sem8 = Semester({ 'ECEN476' 'ENGL316' 'RELA301' 'ECEN487' 'ECEN485' 'UNIV291' },courseDB);
 % 
 % semesters = [ sem1 sem2 sem3 sem4 sem5 sem6 sem7 sem8 ];
-% cp = CollegePlan(courseDB,requirements,semesters);
-% 
-% 
-
-% %% Construct the Course Bin
-% CourseBin = {};
-% for ii = 1:numel(requirements)
-%     CourseBin = [ CourseBin requirements(ii).courseIDs(:)'];
-% end
-% CourseBin = unique(CourseBin);
-% 
-% % Initialize a Courses taken bin
-% TakenBin = courseDB.get('EMPTY');
+% cp = CollegePlan(requirements,semesters);
 
 %% Build A College Plan
 
-% rng('default');
+rng('default');
 [ requirements ] = getRequirements();
 
-% Make a number of them
-num_gen = 30;
-% collegePlans = { };
+% Makin' babies
+num_gen = 75;
 for ii = 1:num_gen
-    collegePlans(ii) = CollegePlan(requirements,[]);
+    babies(ii) = CollegePlan(requirements,[]);
     a = 0; b = 0;
     while ~all(b)
-        collegePlans(ii).generateSemester();
-        [ a,b ] = collegePlans(ii).isConsistent();
+        babies(ii).generateSemester();
+        [ a,b ] = babies(ii).isConsistent();
         % fprintf('%d\n',sum(b));
     end
-    fprintf('Number of semesters: %d\n',numel(collegePlans(ii).semesters));
+    fprintf('Number of semesters: %d with fit %f and gpa: %f\n',numel(babies(ii).semesters),babies(ii).getFit(),babies(ii).gpa);
 end
+showit(babies,'Original Generation');
+fitness(1) = calcfit(babies);
+
+%%
+mutrate = 0.4;
+crossrate = 0.9;
+iters = 30;
+for ii = 1:iters
+    fprintf('################# ITERATION %d #################\n',ii); 
+    [ babies ] = genalg(babies,mutrate,crossrate);
+    
+    % Plot what's going on at this iteration
+    showit(babies,sprintf('Generation %d',ii));
+    fitness(ii+1) = calcfit(babies);
+end
+
+figure;
+plot(fitness);
+title('Fitness');
+xlabel('Iteration');
+ylabel('Fitness');

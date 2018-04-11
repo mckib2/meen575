@@ -5,6 +5,7 @@ classdef CollegePlan < handle
         courseDB;
         CourseBin;
         TakenBin;
+        gpa;
     end
     
     properties(Access = private)
@@ -30,12 +31,27 @@ classdef CollegePlan < handle
         end
         
         function [ val ] = getFit(obj)
-%             
-%             for ii = 1:numel(self.semesters)
-%                 for jj = 1:numel(self.semesters(ii).courses)
-%                     c = self.semesters(ii).courses(jj);
-%                     gpa = 4.3*c.timespent/(((7/9)*c.difficulty + 2/9)*c.creditHours);
-            
+            prevGPA = 0;
+            totGPA = 0;
+            coursenumpen = 0;
+            for ii = 1:numel(obj.semesters)
+                s = obj.semesters(ii);
+                s.calcTuition(prevGPA);
+                totGPA = totGPA + s.gpa;
+                
+                % Penalty term for many courses
+                if s.creditHours > 19
+                    coursenumpen = coursenumpen + 1;
+                end
+                
+                % Update prevGPA
+                prevGPA = s.gpa;
+            end
+            totGPA = totGPA/numel(obj.semesters);
+            obj.gpa = totGPA;
+            %val = totGPA - (1/3)*numel(obj.semesters);
+            val = totGPA - 0.008*exp(numel(obj.semesters)/1.5) - 1.5*coursenumpen;
+            %val = totGPA - numel(obj.semesters);
         end
         
         function [ prereqsFulfilled,requirementsFulfilled ] = isConsistent(obj)
@@ -63,9 +79,10 @@ classdef CollegePlan < handle
             obj.courseDB = getCourseDB();
         end
         
-        function [ sem ] = generatePrefSemester(obj,sem)
-            for ii = 1:numel(sem.courseIDs)
-                c = obj.courseDB.get(sem.courseIDs(ii));
+        function [ sem ] = generatePrefSemester(obj,pref)
+            sem = Semester({},obj.courseDB);
+            for ii = 1:numel(pref.courseIDs)
+                c = obj.courseDB.get(pref.courseIDs(ii));
                 if ismember(c.id,obj.CourseBin)
                     % Check prereqs
                     prereqs = findPrereq(c,obj.courseDB);
@@ -77,10 +94,14 @@ classdef CollegePlan < handle
             
             obj.TakenBin = obj.getTakenBin();
             obj.CourseBin = obj.getCourseBin();
-            sem = obj.generateSemester(sem,18 - sem.creditHours);
+            sem = obj.generateSemester(sem,30 - pref.creditHours);
         end
         
         function [ sem ] = generateSemester(obj,varargin)
+            
+            % max credits
+            maxCreds = 30;
+            
             % Start with a fresh semester
             
             if nargin > 1
@@ -91,14 +112,14 @@ classdef CollegePlan < handle
                 sem = Semester({ });
                 
                 %  Choose a level to start the credit bucket at
-                credHrs0 = randi(6,1,1);
+                credHrs0 = randi(12,1,1);
                 credHrs = credHrs0;
             end
             
             % Keep adding courses till we run out of room
             stop = false;
             cntr = 0;
-            while ((credHrs < 19) && ~isempty(obj.CourseBin) && ~stop && (cntr < 10))
+            while ((credHrs <= maxCreds) && ~isempty(obj.CourseBin) && ~stop && (cntr < 10))
                 cntr = cntr + 1;
                 idx = randi([ 1 numel(obj.CourseBin) ],1,1);
                 courseID = obj.CourseBin(idx);
@@ -134,7 +155,7 @@ classdef CollegePlan < handle
 
                     % Add all the courses that we can
                     for ii = 1:numel(prereqs)
-                        if ~(credHrs + prereqs(ii).creditHours > 18)
+                        if ~(credHrs + prereqs(ii).creditHours > maxCreds)
                             
                             doit = 1;                            
                             for kk = 1:numel(obj.TakenBin)
@@ -205,12 +226,12 @@ classdef CollegePlan < handle
                         end
                     end
                 else
-                    if ~(credHrs + c.creditHours > 18)
+                    if ~(credHrs + c.creditHours > maxCreds)
 
                         doit = 1;
                         for kk = 1:numel(obj.TakenBin)
                             if strcmp(c.id,obj.TakenBin(kk).id) || ismember(c.id,sem.courseIDs)
-                                disp(c.id);
+                                %disp(c.id);
                                 doit = 0;
                                 break;
                             end
@@ -281,17 +302,20 @@ classdef CollegePlan < handle
         end
         
         function [ ] = print(obj)
+            % Header
+            fprintf('College Plan, GPA: %f, fitness: %f, num sem: %d\n',obj.gpa,obj.getFit(),numel(obj.semesters));
+            
             % Print out each semester
             for ii = 1:numel(obj.semesters)
-                fprintf('Semester %d:\n',ii)
+                fprintf('\t Semester %d:\n',ii)
                 sem_list = join(obj.semesters(ii).courseIDs);
-                fprintf('\t %s\n',sem_list{1});
+                fprintf('\t\t %s\n',sem_list{1});
             end
         end
        
         function [ ] = mutate(obj)
             % Randomly choose a semester that will be mutated
-            idx = randi([ 1 numel(obj.semesters) ],1,1);
+            idx = randi([ 1 floor(numel(obj.semesters)) ],1,1);
             obj.semesters(idx+1:end) = [];
             
             % Reset the CourseBin and TakenBin

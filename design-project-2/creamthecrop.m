@@ -13,10 +13,10 @@ function  [ cream ] = creamthecrop(parents,children)
     
     % Evaluate all fitnesses.  We can actually do this in parallel to save
     % time
-    parfor ii = 1:numel(parents)
-        parents(ii).getFit();
-        children(ii).getFit();
-    end
+    %parfor ii = 1:numel(parents)
+    %    parents(ii).getFit();
+    %    children(ii).getFit();
+    %end
     
     % Sort the parents and children
     all_gen = [ parents(:); children(:) ];

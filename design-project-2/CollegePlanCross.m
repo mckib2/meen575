@@ -23,12 +23,24 @@ function [ c1,c2 ] = CollegePlanCross(p1,p2)
     
     b = 0; ii = 1;
     while ~all(b)
-        if ii <= length(pref1)
-            c1.generatePrefSemester(pref1(ii));
+        if ii <= length(pref2)
+            c1.generatePrefSemester(pref2(ii));
         else
             c1.generateSemester();
         end
         [ ~,b ] = c1.isConsistent();
+        ii = ii + 1;
+    end
+    
+    % Now for the other
+    b = 0; ii = 1;
+    while ~all(b)
+        if ii <= length(pref1)
+            c2.generatePrefSemester(pref1(ii));
+        else
+            c2.generateSemester();
+        end
+        [ ~,b ] = c2.isConsistent();
         ii = ii + 1;
     end
     

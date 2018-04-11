@@ -13,7 +13,7 @@ num_babies = 10;
 mutrate = .3;
 crossrate = .7;
 
-%% Maken' babies
+%% Makin' babies
 for ii = 1:num_babies
     babies(ii) = test_model( ...
         randi([ 1 3 ],1), ...
